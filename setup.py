@@ -7,7 +7,7 @@ here = os.path.abspath(os.path.dirname(__file__))
 with codecs.open(os.path.join(here, "README.md"), encoding="utf-8") as fh:
     long_description = "\n" + fh.read()
 
-VERSION = '0.0.3'
+VERSION = '0.0.4'
 DESCRIPTION = 'PySide6 Helpers for Powerful Async Desktop Apps'
 # LONG_DESCRIPTION = 'Longer description here'
 
@@ -15,13 +15,13 @@ DESCRIPTION = 'PySide6 Helpers for Powerful Async Desktop Apps'
 setup(
     name="PySink",
     version=VERSION,
-    author="Zack Johnson)",
+    author="Zack Johnson",
     author_email="<zackjohnson298@gmail.com>",
     description=DESCRIPTION,
     long_description_content_type="text/markdown",
     long_description=long_description,
     packages=find_packages(),
-    install_requires=[],
+    install_requires=['pyside6'],
     keywords=['python', 'app', 'gui', 'async', 'application', 'desktop', 'ui'],
     classifiers=[
         "Development Status :: 1 - Planning",
