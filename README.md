@@ -18,9 +18,8 @@ such as MVVM.
 PySink is based on the concept of Workers and Managers. Workers are custom objects that 
 perform your long-running tasks. They inherit from the provided *AsyncWorker* class and 
 override the *AsyncWorker.run()* method to perform the tasks, emitting progress values and 
-optional status messages along the way. 
+optional status messages along the way. These workers are managed by a generalized object called the *AsyncManager*. 
 
-These workers are managed by a generalized object called the *AsyncManager*. 
 The Manager is an object that manages all the threading, passes along the signals and values 
 emitted by the Worker, and handles the cancellation of said threads and workers when necessary.
 
@@ -140,7 +139,7 @@ Worker Complete!
 Congratulations! You've just implemented an AsyncWorker that runs a task in a background thread.
 Running the task like this has freed up the UI thread, allowing your users to still interact
 with your application without freezing the UI. In the next example, we will see how to use the
-provided ProgressBarWidget to display this task to users in a simple app
+provided ProgressBarWidget to display this task to users in a simple app.
 
 
 [//]: # ()
