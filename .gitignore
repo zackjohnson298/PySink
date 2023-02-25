@@ -1,0 +1,5 @@
+.idea
+dist
+build
+pysink.egg-info
+.DS_Store
