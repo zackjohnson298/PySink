@@ -1,4 +1,4 @@
-# pysink
+# PySink
 
 Under construction! Not ready for use yet! Currently experimenting and planning!
 
@@ -9,7 +9,7 @@ Developed by Zack Johnson
 Setting up a basic Async App
 
 ```python
-from pysink import hello_pysink
+from PySink import hello_pysink
 
 hello_pysink()
 # Other Code
