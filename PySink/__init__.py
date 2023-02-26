@@ -1,3 +1,3 @@
-from AsyncWorker import AsyncWorker
-from AsyncManager import AsyncManager
+from PySink.AsyncWorker import AsyncWorker
+from PySink.AsyncManager import AsyncManager
 

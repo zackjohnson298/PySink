@@ -1,4 +1,5 @@
 from PySide6.QtCore import QObject, Signal
+import time
 
 
 class AsyncWorker(QObject):
@@ -18,6 +19,7 @@ class AsyncWorker(QObject):
         self.complete()
 
     def run(self) -> None:
+        time.sleep(5)
         self.complete()
 
     def reset(self) -> None:

@@ -23,7 +23,8 @@ optional status messages along the way. These workers are managed by a generaliz
 The Manager is an object that manages all the threading, passes along the signals and values 
 emitted by the Worker, and handles the cancellation of said threads and workers when necessary.
 
-Let's look at a couple examples to help you get started. Full examples and all source code can be found at https://github.com/zackjohnson298/PySink
+Let's look at a couple examples to help you get started. Full examples and all source code can 
+be found at https://github.com/zackjohnson298/PySink
 
 ### Example 1: Defining and Using a Custom Async Worker
 In this first example, we will create a custom AsyncWorker that performs *time.sleep()* 
@@ -62,7 +63,7 @@ class DemoAsyncWorker(AsyncWorker):
     def run(self):
         progress = 0
         progress_increment = 100 / self.cycles
-        # Update progress by providing a progress value from 0-10 with an 
+        # Update progress by providing a progress value from 0-100 with an 
         #   optional message
         self.update_progress(0, 'Starting Task')
         for ii in range(self.cycles):
@@ -138,110 +139,267 @@ Worker Complete!
 ```
 Congratulations! You've just implemented an AsyncWorker that runs a task in a background thread.
 Running the task like this has freed up the UI thread, allowing your users to still interact
-with your application without freezing the UI. In the next example, we will see how to use the
-provided ProgressBarWidget to display this task to users in a simple app.
+with your application without freezing the UI. (Full example can be found at https://github.com/zackjohnson298/PySink/examples)
+
+In the next example, we will see how to use PySink to create a basic asynchronous App. 
+We'll also see how to use the provided ProgressBarWidget to display the progress of your 
+asynchronous task to the user.
+
+### Example 2: Create a Basic Asynchronous App
+Now let's create a desktop app that allows the user to start a long-running task and monitor 
+its progress within the UI. This example will follow a basic MVC architecture.
+
+PySink includes a helper Widget called the ProgressBarWidget that packages up some helpful
+progress bar functionality into a single class. This widget allows you to easily display 
+discrete progress values from 0-100, show an indeterminate progress state by passing in a negative
+value, and (on Windows) set text that gets overlaid on the progress bar (refer to the docs for
+more information).
+
+Let's get started building the App. Since this is a demo of PySink and not a PyQt tutorial, I 
+will not dive too deep into PySide6 Windows, Widgets, or layout management. Start by 
+setting up a basic View that inherits from QMainWindow, and populate the view with some 
+widgets:
+
+```python
+from PySide6.QtWidgets import QMainWindow, QVBoxLayout, QPushButton, QWidget, QGridLayout, QLabel
+from PySide6.QtCore import Signal
+from PySink.Widgets import ProgressBarWidget
 
 
-[//]: # ()
-[//]: # (```python)
+class MainView(QMainWindow):
+    button_pushed_signal = Signal()
 
-[//]: # (from PySink import AsyncWorker)
+    def __init__(self):
+        super(MainView, self).__init__()
 
-[//]: # (import time)
+        # Widgets
+        self.button = QPushButton('Start')
+        self.progress_bar = ProgressBarWidget()
+        self.result_label = QLabel()
+        self.warnings_label = QLabel()
+        self.errors_label = QLabel()
 
-[//]: # ()
-[//]: # ()
-[//]: # (class DemoAsyncWorker&#40;AsyncWorker&#41;:)
+        # Connect Signals
+        self.button.clicked.connect(self.button_pushed_signal.emit)
 
-[//]: # (    def __init__&#40;self, delay_seconds: int, cycles=4&#41;:)
+        # Layout
+        grid_layout = QGridLayout()
+        grid_layout.addWidget(QLabel('Result:'), 0, 0)
+        grid_layout.addWidget(QLabel('Warnings:'), 1, 0)
+        grid_layout.addWidget(QLabel('Error:'), 2, 0)
+        grid_layout.addWidget(self.result_label, 0, 1)
+        grid_layout.addWidget(self.warnings_label, 1, 1)
+        grid_layout.addWidget(self.errors_label, 2, 1)
 
-[//]: # (        super&#40;DemoAsyncWorker, self&#41;.__init__&#40;&#41;)
+        central_layout = QVBoxLayout()
+        central_layout.addLayout(grid_layout)
+        central_layout.addWidget(self.button)
+        central_layout.addWidget(self.progress_bar)
+        central_widget = QWidget()
+        central_widget.setLayout(central_layout)
+        self.setCentralWidget(central_widget)
 
-[//]: # (        self.delay_seconds = delay_seconds)
+    def set_result(self, result):
+        self.result_label.setText(str(result))
 
-[//]: # (        self.cycles = cycles)
+    def set_warnings(self, warnings):
+        self.warnings_label.setText(str(warnings))
 
-[//]: # ()
-[//]: # (    def run&#40;self&#41;:)
+    def set_errors(self, errors):
+        self.errors_label.setText(str(errors))
 
-[//]: # (        progress = 0)
+    def set_progress(self, progress_value, message=None):
+        self.progress_bar.set_value(progress_value)
+        if message:
+            self.progress_bar.set_text(message)
 
-[//]: # (        progress_increment = 100 / self.cycles)
+    def clear(self):
+        self.warnings_label.setText('')
+        self.errors_label.setText('')
+        self.result_label.setText('')
+        
+    def show_progress(self):
+        self.button.setVisible(False)
+        self.progress_bar.setVisible(True)
+    
+    def show_button(self):
+        self.progress_bar.setVisible(False)
+        self.button.setVisible(True)
 
-[//]: # (        # Update progress by providing a progress value from 0-10 with an optional message)
 
-[//]: # (        self.update_progress&#40;0, 'Starting Task'&#41;)
 
-[//]: # (        for ii in range&#40;self.cycles&#41;:)
+if __name__ == '__main__':
+    from PySide6.QtWidgets import QApplication
 
-[//]: # (            time.sleep&#40;self.delay_seconds&#41;)
+    app = QApplication()
+    window = MainView()
+    window.show()
 
-[//]: # (            progress += progress_increment)
+    app.exec()
+```
 
-[//]: # (            self.update_progress&#40;progress, f'Progress message #{ii + 1}'&#41;)
+Including the snippet within the *\_\_name__ == \_\_main__* block allows you to run this
+as a script on its own and see the window you've just created. Doing this allows you to make 
+sure the UI looks correct before you connect any actions to the View. 
+Run the script to see the app window:
 
-[//]: # (            # Store any errors/warnings in the provided attributes. They are emitted by default)
+![alt text](img/example2_main_view.png "Title")
 
-[//]: # (            self.warnings.append&#40;f'Demo Warning {ii + 1}'&#41;)
+This very simple app has a start button, progress bar, and some labels to display the data.
+The View also has a signal that gets emitted on the button press, as well as a 
+few helper methods to reset the UI and set the progress and output values. Exposing the 
+signals and providing methods like this are not required to make an app work. However, 
+doing so decouples the UI from the application logic allowing for much more flexibility in
+the future.
 
-[//]: # (            self.errors.append&#40;f'Demo Error {ii + 1}'&#41;)
+Now let's make the app actually do something. In the MVC architecture, it is the Controller 
+that 'controls' the state of the UI, reacts to the signals it emits, and provides data to the
+View to be displayed. Again, let's look at the code for the Controller before diving in to how it
+works:
 
-[//]: # (        # Call the self.complete method to end your task, passing any results as keyword arguments)
+```python
+from PySink import AsyncManager
+from DemoAsyncWorker import DemoAsyncWorker
+from MainView import MainView
 
-[//]: # (        demo_result = 12)
 
-[//]: # (        self.complete&#40;demo_result=demo_result&#41;)
+class MainController:
+    def __init__(self, view: MainView):
+        # Initialize/Store Attributes
+        self.view = view
+        self.async_manager = AsyncManager()
+        # Connect UI Signals
+        self.view.button_pushed_signal.connect(self.start_task)
+        # Connect Async Signals
+        self.async_manager.worker_progress_signal.connect(self.view.set_progress)
+        self.async_manager.worker_finished_signal.connect(self.task_complete_callback)
+        # Initialize UI State
+        self.view.show_button()
 
-[//]: # (        )
-[//]: # ()
-[//]: # (```)
+    def start_task(self):
+        # Update UI
+        self.view.clear()
+        self.view.show_progress()
+        # Initialize/Start Worker
+        worker = DemoAsyncWorker(2, cycles=5)
+        self.async_manager.start_worker(worker)
 
-[//]: # ()
-[//]: # ()
-[//]: # (When you want to start a long-running task, initialize an AsyncManager and run the worker, passing in references to a completion callback and an optionalal)
+    def task_complete_callback(self, results):
+        # Update UI
+        self.view.clear()
+        self.view.show_button()
+        # Handle results
+        self.view.set_result(results.get('demo_result'))
+        self.view.set_warnings(results.get('warnings'))
+        self.view.set_errors(results.get('errors'))
+```
+In this example, the Controller gets initialized with the view it is controlling. Injecting 
+the dependency like this allows you to create layers in your App Architecture, and moves the 
+responsibility of 'showing' the window up a level. It also makes the Controller testable. 
+By mocking the attributes and methods of our view in a different class (that
+doesn't need UI at all) tests can be automated much faster. Again, this is not required to 
+get a PySink app to work, but this practice will be beneficial in the long run.
 
-[//]: # ()
-[//]: # (```python)
+Let's take a closer look at the Controller's *\_\_init\_\_()* method:
+```python
+class MainController:
+    def __init__(self, view: MainView):
+        # Initialize/Store Attributes
+        self.view = view
+        self.async_manager = AsyncManager()
+        # Connect UI Signals
+        self.view.button_pushed_signal.connect(self.start_task)
+        # Connect Async Signals
+        self.async_manager.worker_progress_signal.connect(self.view.set_progress)
+        self.async_manager.worker_finished_signal.connect(self.task_complete_callback)
+        # Initialize UI State
+        self.view.show_button()
+```
 
-[//]: # (from PySink import AsyncWorker)
+Within the *\_\_init__()* method, any attributes needed by the controller are initialized and
+stored. In this case, those are the View and an AsyncManager (storing the manager as an 
+attribute ensures that the worker and thread stay alive after calling the Manager's 
+*start_worker* method).
 
-[//]: # (import time)
+The View's signals are then connected to the internal methods that respond to them. In this 
+case, it is a single signal called *button_pressed_signal* which gets connected to the 
+Controller's *start_task* method. We also connect the Manager's signals to their respective 
+callback functions: *self.view.update_progress* for the progress signal and *self.task_complete_callback* for the 
+completion signal.
 
-[//]: # ()
-[//]: # ()
-[//]: # (class DemoAsyncWorker&#40;AsyncWorker&#41;:)
+Lastly, the UI is placed into the intended initial state that will be displayed upon 
+application launch. In this example, that just means displaying the start button.
 
-[//]: # (    def __init__&#40;self, delay_seconds, cycles=4&#41;:)
+Let's take a closer look at the Controller's *start_task* method. This is the method that gets
+called when the user presses the start button:
 
-[//]: # (        super&#40;DemoAsyncWorker, self&#41;.__init__&#40;&#41;)
+```python
+    def start_task(self):
+        # Update UI
+        self.view.clear()
+        self.view.show_progress()
+        # Initialize/Start Worker
+        worker = DemoAsyncWorker(2, cycles=5)
+        self.async_manager.start_worker(worker)
+```
+Here, the UI is updated so that it is in the correct state for the long-running task to take
+place. This usually means clearing out old data, showing the progress widgets, and 
+disabling/hiding anything that shouldn't be shown while the task is running.
 
-[//]: # (        self.delay_seconds = delay_seconds)
+After the UI is dealt with, the task is started by simply creating a new instance of the Worker 
+(passing in any values it needs), and passing it to the *start_worker* method of the 
+AsyncManager. And that's it! The worker is now running in the background and the progress 
+is getting updated within the UI. 
 
-[//]: # (        self.cycles = delay_count)
+Now let's look at what happens when the worker is done running its task. Since the 
+AsyncManager's *worker_finished_signal* was connected to the Controller's 
+*task_complete_callback*, that callback will be executed upon the worker's completion. 
+Here's what the callback looks like:
 
-[//]: # ()
-[//]: # (    def run&#40;self&#41;:)
+```python
+    def task_complete_callback(self, results):
+        # Update UI
+        self.view.clear()
+        self.view.show_button()
+        # Handle results
+        self.view.set_result(results.get('demo_result'))
+        self.view.set_warnings(results.get('warnings'))
+        self.view.set_errors(results.get('errors'))
+```
 
-[//]: # (        progress = 0)
+As stated in the previous example, the results of the worker's task are provided as a 
+dictionary that gets passed in to the completion callback. This dictionary contains the 
+values defined as keyword arguments within the worker's *run* method, as well as any 
+warnings/errors encountered during the task. In this callback, the UI is again updated to 
+reflect the task's completion and the results are displayed to the user by passing them into
+the View. 
 
-[//]: # (        progress_increment = 100 / self.count)
+And that's it! You now have a fully functional asynchronous application. Since Dependency
+Injection was implemented in the Controller, you will need to instantiate both the Controller
+and pass it an existing View. Create a new file, import the Controller and View, and start
+a QApplication:
 
-[//]: # (        for ii in range&#40;self.count&#41;:)
+```python
+from PySide6.QtWidgets import QApplication
+from MainController import MainController
+from MainView import MainView
 
-[//]: # (            self.update_progress&#40;progress, f'Progress message #{ii + 1}'&#41;)
 
-[//]: # (            time.sleep&#40;self.delay_seconds&#41;)
+app = QApplication()
+view = MainView()
+controller = MainController(view)
+view.show()
+app.exec()
+```
 
-[//]: # (            progress += progress_increment)
+Run the script and the application will start. Pushing the start button within the app will 
+trigger the long-running task, and at its completion data from the worker will be displayed:
 
-[//]: # (        self.update_progress&#40;100, 'Complete'&#41;)
+![alt text](img/example2_while_running.png "Title")
 
-[//]: # (        self.error = 'Demo Error')
+![alt text](img/example2_complete.png "Title")
 
-[//]: # (        self.complete&#40;error=self.error, value=12&#41;)
 
-[//]: # (```)
 
-[//]: # ()
-[//]: # ()
-[//]: # ([//]: # &#40;Check out: https://www.youtube.com/c/NeuralNine&#41;)
+Congratulations! You've just created an asynchronous app with PySink!
+Full example code can be found at https://github.com/zackjohnson298/PySink/examples
