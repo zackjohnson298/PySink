@@ -139,7 +139,9 @@ Worker Complete!
 ```
 Congratulations! You've just implemented an AsyncWorker that runs a task in a background thread.
 Running the task like this has freed up the UI thread, allowing your users to still interact
-with your application without freezing the UI. (Full example can be found at https://github.com/zackjohnson298/PySink/examples)
+with your application without freezing the UI. Full example code can be found at 
+https://github.com/zackjohnson298/PySink 
+in the examples/example1 folder.
 
 In the next example, we will see how to use PySink to create a basic asynchronous App. 
 We'll also see how to use the provided ProgressBarWidget to display the progress of your 
@@ -375,7 +377,7 @@ reflect the task's completion and the results are displayed to the user by passi
 the View. 
 
 And that's it! You now have a fully functional asynchronous application. Since Dependency
-Injection was implemented in the Controller, you will need to instantiate both the Controller
+Injection was implemented in the Controller, you will need to instantiate the Controller
 and pass it an existing View. Create a new file, import the Controller and View, and start
 a QApplication:
 
@@ -400,6 +402,6 @@ trigger the long-running task, and at its completion data from the worker will b
 ![alt text](img/example2_complete.png "Title")
 
 
-
 Congratulations! You've just created an asynchronous app with PySink!
-Full example code can be found at https://github.com/zackjohnson298/PySink/examples
+Full example code can be found at https://github.com/zackjohnson298/PySink 
+in the examples/example2 folder.
