@@ -39,11 +39,11 @@ jobs:
         pip install wheel
     - name: Build package using Setup
       run: python setup.py sdist bdist_wheel
-     - name: Publish package
-       uses: pypa/gh-action-pypi-publish@27b31702a0e7fc50959f5ad993c78deac1bdfc29
-       with:
-         user: __token__
-         password: ${{ secrets.PYPI_API_KEY }}
+    - name: Publish package
+      uses: pypa/gh-action-pypi-publish@27b31702a0e7fc50959f5ad993c78deac1bdfc29
+      with:
+        user: __token__
+        password: ${{ secrets.PYPI_API_KEY }}
 #    - name: PyPI Deployment
 #      # You may pin to the exact commit or the version.
 #      # uses: casperdcl/deploy-pypi@3181cc0919c032ba42e365bd514e27442c54a3be
