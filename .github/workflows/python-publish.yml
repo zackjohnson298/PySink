@@ -13,7 +13,7 @@ on:
   workflow_dispatch:
   push: 
     branches:
-      - 'build_action_test'
+      - 'main'
 
 #   release:
 #     types: [published]
@@ -39,35 +39,35 @@ jobs:
         pip install wheel
     - name: Build package using Setup
       run: python setup.py sdist bdist_wheel
-#     - name: Publish package
-#       uses: pypa/gh-action-pypi-publish@27b31702a0e7fc50959f5ad993c78deac1bdfc29
-#       with:
-#         user: __token__
-#         password: ${{ secrets.PYPI_API_TOKEN }}
-    - name: PyPI Deployment
-      # You may pin to the exact commit or the version.
-      # uses: casperdcl/deploy-pypi@3181cc0919c032ba42e365bd514e27442c54a3be
-      uses: casperdcl/deploy-pypi@v2.2.2
-      with:
-        # PyPI username
-#         user: # optional, default is __token__
-        # PyPI password or API token
-        password: ${{ secrets.PYPI_TEST_API_KEY }}
-        # Build requirements
-#         requirements: # optional, default is twine wheel
-        # `setup.py` command to run ("true" is a shortcut for "clean sdist -d <dist_dir> bdist_wheel -d <dist_dir>")
-#         build: # optional
-        # `pip` command to run ("true" is a shortcut for "wheel -w <dist_dir> --no-deps .")
-#         pip: # optional
-        # Whether to run basic checks on the built files
-#         check: # optional, default is true
-        # Whether to upload
-        upload: false # optional, default is true
-        # Directory containing distributions
-#         dist_dir: # optional, default is dist
-        # Destination repository (package index) URL
-        url: testpypi # optional, default is 
-        # GPG key to import for signing
-#         gpg_key: # optional, default is 
-        # Continue uploading files if one already exists
-#         skip_existing: # optional
+     - name: Publish package
+       uses: pypa/gh-action-pypi-publish@27b31702a0e7fc50959f5ad993c78deac1bdfc29
+       with:
+         user: __token__
+         password: ${{ secrets.PYPI_API_KEY }}
+#    - name: PyPI Deployment
+#      # You may pin to the exact commit or the version.
+#      # uses: casperdcl/deploy-pypi@3181cc0919c032ba42e365bd514e27442c54a3be
+#      uses: casperdcl/deploy-pypi@v2.2.2
+#      with:
+#        # PyPI username
+##         user: # optional, default is __token__
+#        # PyPI password or API token
+#        password: ${{ secrets.PYPI_TEST_API_KEY }}
+#        # Build requirements
+##         requirements: # optional, default is twine wheel
+#        # `setup.py` command to run ("true" is a shortcut for "clean sdist -d <dist_dir> bdist_wheel -d <dist_dir>")
+##         build: # optional
+#        # `pip` command to run ("true" is a shortcut for "wheel -w <dist_dir> --no-deps .")
+##         pip: # optional
+#        # Whether to run basic checks on the built files
+##         check: # optional, default is true
+#        # Whether to upload
+#        upload: false # optional, default is true
+#        # Directory containing distributions
+##         dist_dir: # optional, default is dist
+#        # Destination repository (package index) URL
+#        url: testpypi # optional, default is
+#        # GPG key to import for signing
+##         gpg_key: # optional, default is
+#        # Continue uploading files if one already exists
+##         skip_existing: # optional
