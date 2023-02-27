@@ -9,7 +9,12 @@
 name: Upload Python Package
 
 # on:
-on: workflow_dispatch
+on: 
+  workflow_dispatch:
+  push: 
+    branches:
+      - 'build_action_test'
+
 #   release:
 #     types: [published]
 
