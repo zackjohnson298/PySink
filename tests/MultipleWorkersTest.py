@@ -2,12 +2,10 @@ import json
 
 from PySide6.QtCore import Qt, Signal
 
-from PySink import AsyncWorker, AsyncManager
+from PySink import AsyncWorker, AsyncManager, AsyncWorkerResults
 from PySink.Widgets import ProgressBarWidget
-from PySide6.QtWidgets import QApplication, QMainWindow, QLabel, QHBoxLayout, QGridLayout, QPushButton, QWidget, \
-    QVBoxLayout
+from PySide6.QtWidgets import QApplication, QMainWindow, QLabel, QHBoxLayout, QPushButton, QWidget, QVBoxLayout
 import time
-import sys
 from random import randint
 
 
@@ -21,7 +19,6 @@ class DemoAsyncWorker(AsyncWorker):
         progress = 5
         self.update_progress(progress)
         for ii in range(self.count):
-            # print(f'Worker {self.id} step: {ii}')
             time.sleep(self.delay_seconds)
             progress += int(90 / self.count)
             self.update_progress(progress)
@@ -90,7 +87,6 @@ class MainController:
         # Initialize UI
         for widget in self.view.progress_widgets:
             widget.setVisible(False)
-        # print(self.async_manager.threadpool.maxThreadCount())
 
     def all_workers_complete(self):
         self.view.start_button.setEnabled(True)
@@ -101,9 +97,9 @@ class MainController:
             self.view.progress_bars[row_index].set_value(value)
             self.view.progress_bars[row_index].set_text(message)
 
-    def worker_complete(self, results, row_index):
+    def worker_complete(self, results: AsyncWorkerResults, row_index):
         if row_index in self.worker_row_indices:
-            self.view.result_labels[row_index].setText(json.dumps(results))
+            self.view.result_labels[row_index].setText(f'{results.errors}, {results.warnings}')
             self.view.result_labels[row_index].setVisible(True)
             self.view.progress_widgets[row_index].setVisible(False)
             self.worker_row_indices.pop(row_index)

@@ -1,5 +1,6 @@
 from PySide6.QtWidgets import QWidget, QProgressBar, QLabel, QGridLayout
 from PySide6.QtCore import Qt
+from PySink import AsyncWorkerProgress
 import platform
 
 
@@ -33,6 +34,10 @@ class ProgressBarWidget(QWidget):
     def set_text(self, message):
         if platform.system() == 'Windows':
             self.label.setText(message)
+
+    def update_progress(self, progress: AsyncWorkerProgress):
+        self.set_value(progress.value)
+        self.set_text(progress.message)
 
 
 if __name__ == '__main__':
