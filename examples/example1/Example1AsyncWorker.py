@@ -1,14 +1,10 @@
-from PySink import AsyncWorker, AsyncWorkerResults
+from PySink import AsyncWorker
 import time
 
 
-class DemoAsyncWorkerResults(AsyncWorkerResults):
-    demo_result = None
-
-
-class DemoAsyncWorker(AsyncWorker):
+class Example1AsyncWorker(AsyncWorker):
     def __init__(self, delay_seconds: int, cycles=4):
-        super(DemoAsyncWorker, self).__init__(result_type=DemoAsyncWorkerResults)
+        super(Example1AsyncWorker, self).__init__()
         self.delay_seconds = delay_seconds
         self.cycles = cycles
 

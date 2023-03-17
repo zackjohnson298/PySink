@@ -1,88 +1,68 @@
+from PySide6.QtGui import QPixmap
+from PySide6.QtWidgets import QMainWindow, QVBoxLayout, QPushButton, QWidget, QGridLayout, QLabel
+from PySide6.QtCore import Signal
+
 from PySink import AsyncWorkerProgress
 from PySink.Widgets import ProgressBarWidget
-from PySide6.QtCore import Signal
-from PySide6.QtWidgets import QMainWindow, QPushButton, QVBoxLayout, QWidget, QLabel, QHBoxLayout
-
-
-class RowItem(QWidget):
-    cancel_signal = Signal()
-
-    def __init__(self, title: str, parent=None):
-        super(RowItem, self).__init__(parent)
-        self.progress_bar = ProgressBarWidget()
-        self.cancel_button = QPushButton('Cancel')
-        self.title_label = QLabel(title)
-        self.progress_widget = QWidget()
-        self.result_label = QLabel()
-        # Connect slots
-        self.cancel_button.clicked.connect(self.cancel_signal.emit)
-        # Layout
-        progress_layout = QHBoxLayout(self.progress_widget)
-        progress_layout.addWidget(self.progress_bar)
-        progress_layout.addWidget(self.cancel_button)
-        progress_layout.setContentsMargins(0, 0, 0, 0)
-
-        layout = QHBoxLayout(self)
-        layout.addWidget(self.title_label)
-        layout.addWidget(self.progress_widget)
-        layout.addWidget(self.result_label)
-        layout.setContentsMargins(0, 0, 0, 0)
-        self.reset()
-
-    def reset(self):
-        self.result_label.setText('Waiting to Run')
-        self.progress_bar.set_value(0)
-
-    def update_progress(self, progress: AsyncWorkerProgress):
-        self.progress_bar.update_progress(progress)
-
-    def show_progress(self):
-        self.progress_widget.setVisible(True)
-        self.result_label.setVisible(False)
-
-    def hide_progress(self):
-        self.progress_widget.setVisible(False)
-        self.result_label.setVisible(True)
-
-    def set_result(self, result_message):
-        self.result_label.setText(result_message)
 
 
 class MainView(QMainWindow):
-    start_signal = Signal()
-    cancel_signal = Signal()
-    closed = Signal()
+    button_pushed_signal = Signal()
 
-    def __init__(self, row_count=3):
+    def __init__(self):
         super(MainView, self).__init__()
-        # Widgets/ Layouts
-        self.start_button = QPushButton('Start All Workers')
-        self.cancel_all_button = QPushButton('Cancel All Workers')
-        self.row_items = [RowItem(f'Worker {ii+1}:', parent=self) for ii in range(row_count)]
-        # Connect Slots
-        self.start_button.clicked.connect(self.start_signal.emit)
-        self.cancel_all_button.clicked.connect(self.cancel_signal.emit)
+
+        # Widgets
+        self.button = QPushButton('Start')
+        self.progress_bar = ProgressBarWidget()
+        self.warnings_label = QLabel()
+        self.errors_label = QLabel()
+        self.result_label = QLabel()
+
+        # Connect Signals
+        self.button.clicked.connect(self.button_pushed_signal.emit)
+
         # Layout
+        grid_layout = QGridLayout()
+        grid_layout.addWidget(QLabel('Result:'), 0, 0)
+        grid_layout.addWidget(QLabel('Warnings:'), 1, 0)
+        grid_layout.addWidget(QLabel('Error:'), 2, 0)
+        grid_layout.addWidget(self.result_label, 0, 1)
+        grid_layout.addWidget(self.warnings_label, 1, 1)
+        grid_layout.addWidget(self.errors_label, 2, 1)
+
+        central_layout = QVBoxLayout()
+        central_layout.addLayout(grid_layout)
+        central_layout.addWidget(self.button)
+        central_layout.addWidget(self.progress_bar)
         central_widget = QWidget()
-        central_layout = QVBoxLayout(central_widget)
+        central_widget.setLayout(central_layout)
         self.setCentralWidget(central_widget)
-        for row_item in self.row_items:
-            central_layout.addWidget(row_item)
-        button_layout = QHBoxLayout()
-        button_layout.addWidget(self.start_button)
-        button_layout.addWidget(self.cancel_all_button)
-        button_layout.setContentsMargins(0, 0, 0, 0)
-        central_layout.addLayout(button_layout)
-        self.setCentralWidget(central_widget)
-        self.setFixedSize(self.sizeHint())
 
-    def closeEvent(self, event):
-        self.closed.emit()
-        super().closeEvent(event)
+    def set_result(self, result):
+        self.result_label.setText(str(result))
 
-    def hide_all_progress(self):
-        for widget in self.row_items:
-            widget.hide_progress()
+    def set_warnings(self, warnings):
+        self.warnings_label.setText(str(warnings))
+
+    def set_errors(self, errors):
+        self.errors_label.setText(str(errors))
+
+    def set_progress(self, progress: AsyncWorkerProgress):
+        self.progress_bar.update_progress(progress)
+
+    def clear(self):
+        self.warnings_label.setText('')
+        self.errors_label.setText('')
+        self.result_label.setText('')
+
+    def show_progress(self):
+        self.button.setVisible(False)
+        self.progress_bar.setVisible(True)
+
+    def show_button(self):
+        self.progress_bar.setVisible(False)
+        self.button.setVisible(True)
 
 
 if __name__ == '__main__':
@@ -91,4 +71,8 @@ if __name__ == '__main__':
     app = QApplication()
     window = MainView()
     window.show()
+    p = window.grab()
+    p.save('example2_main_view.png', 'png')
+
     app.exec()
+

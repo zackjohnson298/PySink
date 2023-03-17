@@ -4,7 +4,7 @@ from MainView import MainView
 
 
 app = QApplication()
-view = MainView()
+view = MainView(row_count=15)
 controller = MainController(view)
 view.show()
 app.exec()

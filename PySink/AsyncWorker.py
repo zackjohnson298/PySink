@@ -31,6 +31,7 @@ class AsyncWorker(QRunnable):
         self.cancelled: bool = False
         self.id = identifier if identifier is not None else str(uuid.uuid4())
         self.signals = AsyncWorkerSignals()
+        self.result = result_type()
         self.result_type = result_type
 
     def cancel(self) -> None:
@@ -48,6 +49,7 @@ class AsyncWorker(QRunnable):
         self.errors = []
         self.warnings = []
         self.cancelled = False
+        self.result = self.result_type()
 
     def update_progress(self, progress_value: int, message=None) -> None:
         if not self.cancelled:
@@ -57,21 +59,22 @@ class AsyncWorker(QRunnable):
             progress.id = self.id
             self.signals.progress.emit(progress)
 
-    def get_default_results(self) -> AsyncWorkerResults:
-        results = self.result_type()
-        results.errors = self.errors
-        results.warnings = self.warnings
-        results.id = self.id
-        return results
+    def get_default_results(self, clear=True) -> AsyncWorkerResults:
+        if clear:
+            self.result = self.result_type()
+        self.result.errors = self.errors
+        self.result.warnings = self.warnings
+        self.result.id = self.id
+        return self.result
 
     def complete(self, **kwargs) -> None:
-        if not self.cancelled:
-            results = self.get_default_results()
-            results.results_dict = kwargs
+        if self.cancelled:
+            return
+        self.get_default_results(clear=False)
+        if self.result_type == AsyncWorkerResults:
+            self.result.results_dict = kwargs
+        else:
             for key in kwargs:
-                try:
-                    getattr(results, key)
-                    setattr(results, key, kwargs[key])
-                except AttributeError:
-                    continue
-            self.signals.finished.emit(results)
+                getattr(self.result, key)
+                setattr(self.result, key, kwargs[key])
+        self.signals.finished.emit(self.result)

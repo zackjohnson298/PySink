@@ -1,10 +1,14 @@
-from PySink import AsyncWorker
+from PySink import AsyncWorker, AsyncWorkerResults
 import time
 
 
-class DemoAsyncWorker(AsyncWorker):
+class CustomAsyncWorkerResults(AsyncWorkerResults):
+    demo_result = None
+
+
+class Example3AsyncWorker(AsyncWorker):
     def __init__(self, delay_seconds: int, cycles=4):
-        super(DemoAsyncWorker, self).__init__()
+        super(Example3AsyncWorker, self).__init__(result_type=CustomAsyncWorkerResults)
         self.delay_seconds = delay_seconds
         self.cycles = cycles
 
@@ -18,7 +22,8 @@ class DemoAsyncWorker(AsyncWorker):
             time.sleep(self.delay_seconds)
             progress += progress_increment
             self.update_progress(progress, f'Progress message #{ii + 1}')
-        # Call the self.complete method to end your task, passing any
-        #   results as keyword arguments
+        # Even with custom result types, you can still pass values in to
+        #   self.complete. Be warned, if the kwarg is not an attribute
+        #   of the custom result type, an AttributeError will be raised
         demo_result = 12
         self.complete(demo_result=demo_result)

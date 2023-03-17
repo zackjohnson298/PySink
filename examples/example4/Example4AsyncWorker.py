@@ -2,9 +2,9 @@ from PySink import AsyncWorker
 import time
 
 
-class DemoAsyncWorker(AsyncWorker):
+class Example4AsyncWorker(AsyncWorker):
     def __init__(self, count=5, delay_seconds=1.):
-        super(DemoAsyncWorker, self).__init__()
+        super(Example4AsyncWorker, self).__init__()
         self.count = count
         self.delay_seconds = delay_seconds
 
