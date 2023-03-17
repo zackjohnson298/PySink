@@ -1,5 +1,6 @@
 from PySide6.QtCore import Signal, QObject, QThreadPool
 from PySink.AsyncWorker import AsyncWorker, AsyncWorkerResults, AsyncWorkerProgress
+from PySink.CancellableAsyncWorker import CancellableAsyncWorker
 
 
 class AsyncManager(QObject):
@@ -12,15 +13,23 @@ class AsyncManager(QObject):
         self.threadpool = QThreadPool()
         self.workers: {str: AsyncWorker} = {}
 
-    def cancel_all_workers(self):
+    def cancel_all_workers(self) -> {str: str}:
         current_worker_ids = list(self.workers.keys())
+        errors = {}
         for worker_id in current_worker_ids:
-            self.cancel_worker(worker_id)
+            error = self.cancel_worker(worker_id)
+            if error:
+                errors[worker_id] = error
+        if len(errors) == 0:
+            self.threadpool.clear()
+        return errors
 
     def cancel_worker(self, worker_id: str):
         worker = self.workers.get(worker_id)
         if worker is None:
             return f'There is no worker with id: {worker_id} currently running'
+        if not isinstance(worker, CancellableAsyncWorker):
+            return f'Worker if type {type(worker)} is not Cancellable'
         worker.cancel()
         return None
 

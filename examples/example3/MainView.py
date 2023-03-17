@@ -38,6 +38,9 @@ class MainView(QMainWindow):
         central_widget = QWidget()
         central_widget.setLayout(central_layout)
         self.setCentralWidget(central_widget)
+        self.setWindowTitle('PySink Example 3')
+        self.setFixedWidth(280)
+        self.setFixedHeight(120)
 
     def set_result(self, result):
         self.result_label.setText(str(result))
@@ -60,7 +63,7 @@ class MainView(QMainWindow):
         self.button.setVisible(False)
         self.progress_bar.setVisible(True)
 
-    def show_button(self):
+    def hide_progress(self):
         self.progress_bar.setVisible(False)
         self.button.setVisible(True)
 

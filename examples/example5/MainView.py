@@ -7,11 +7,11 @@ from PySide6.QtWidgets import QMainWindow, QPushButton, QVBoxLayout, QWidget, QL
 class RowItem(QWidget):
     cancel_signal = Signal()
 
-    def __init__(self, parent=None):
+    def __init__(self, title: str, parent=None):
         super(RowItem, self).__init__(parent)
         self.progress_bar = ProgressBarWidget()
         self.cancel_button = QPushButton('Cancel')
-        self.title_label = QLabel('Worker:')
+        self.title_label = QLabel(title)
         self.progress_widget = QWidget()
         self.result_label = QLabel()
         # Connect slots
@@ -51,61 +51,39 @@ class RowItem(QWidget):
 class MainView(QMainWindow):
     start_signal = Signal()
     cancel_signal = Signal()
+    closed = Signal()
 
-    def __init__(self):
+    def __init__(self, row_count=3):
         super(MainView, self).__init__()
         # Widgets
-        self.start_button = QPushButton('Start')
-        self.progress_bar = ProgressBarWidget()
-        self.cancel_button = QPushButton('Cancel')
-        self.title_label = QLabel('Worker:')
-        self.progress_widget = QWidget()
-        self.result_label = QLabel()
+        self.start_button = QPushButton('Start All Workers')
+        self.cancel_all_button = QPushButton('Cancel All Workers')
+        self.row_items = [RowItem(f'Worker {ii+1}:', parent=self) for ii in range(row_count)]
         # Connect Slots
         self.start_button.clicked.connect(self.start_signal.emit)
-        self.cancel_button.clicked.connect(self.cancel_signal.emit)
+        self.cancel_all_button.clicked.connect(self.cancel_signal.emit)
         # Layout
-        progress_layout = QHBoxLayout(self.progress_widget)
-        progress_layout.addWidget(self.progress_bar)
-        progress_layout.addWidget(self.cancel_button)
-        progress_layout.setContentsMargins(0, 0, 0, 0)
-
-        row_layout = QHBoxLayout()
-        row_layout.addWidget(self.title_label)
-        row_layout.addWidget(self.progress_widget)
-        row_layout.addWidget(self.result_label)
-
-        button_layout = QHBoxLayout()
-        button_layout.addWidget(self.start_button)
-        button_layout.addWidget(self.cancel_button)
-        button_layout.setContentsMargins(0, 0, 0, 0)
-
         central_widget = QWidget()
         central_layout = QVBoxLayout(central_widget)
-        central_layout.addLayout(row_layout)
+        self.setCentralWidget(central_widget)
+        for row_item in self.row_items:
+            central_layout.addWidget(row_item)
+        button_layout = QHBoxLayout()
+        button_layout.addWidget(self.start_button)
+        button_layout.addWidget(self.cancel_all_button)
+        button_layout.setContentsMargins(0, 0, 0, 0)
         central_layout.addLayout(button_layout)
         self.setCentralWidget(central_widget)
-        self.setFixedWidth(290)
-        self.setFixedHeight(self.sizeHint().height())
-        self.setWindowTitle('PySink Example 4')
+        self.setFixedSize(self.sizeHint())
+        self.setWindowTitle('PySink Example 5')
 
-    def reset(self):
-        self.result_label.setText('Waiting to Run')
-        self.progress_bar.set_value(0)
+    def closeEvent(self, event):
+        self.closed.emit()
+        super().closeEvent(event)
 
-    def update_progress(self, progress: AsyncWorkerProgress):
-        self.progress_bar.update_progress(progress)
-
-    def show_progress(self):
-        self.progress_widget.setVisible(True)
-        self.result_label.setVisible(False)
-
-    def hide_progress(self):
-        self.progress_widget.setVisible(False)
-        self.result_label.setVisible(True)
-
-    def set_result(self, result_message):
-        self.result_label.setText(result_message)
+    def hide_all_progress(self):
+        for widget in self.row_items:
+            widget.hide_progress()
 
 
 if __name__ == '__main__':

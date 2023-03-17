@@ -18,7 +18,7 @@ class AsyncWorkerProgress:
 
 
 class AsyncWorkerSignals(QObject):
-    started = Signal()
+    started = Signal(str)
     progress = Signal(AsyncWorkerProgress)
     finished = Signal(AsyncWorkerResults)
 
@@ -28,17 +28,10 @@ class AsyncWorker(QRunnable):
         super(AsyncWorker, self).__init__()
         self.errors: list = []
         self.warnings: list = []
-        self.cancelled: bool = False
         self.id = identifier if identifier is not None else str(uuid.uuid4())
         self.signals = AsyncWorkerSignals()
         self.result = result_type()
         self.result_type = result_type
-
-    def cancel(self) -> None:
-        self.errors.append('Cancelled')
-        self.warnings.append('Cancelled')
-        self.cancelled = True
-        self.signals.finished.emit(self.get_default_results())
 
     @Slot()
     def run(self) -> None:
@@ -48,16 +41,17 @@ class AsyncWorker(QRunnable):
     def reset(self) -> None:
         self.errors = []
         self.warnings = []
-        self.cancelled = False
         self.result = self.result_type()
 
     def update_progress(self, progress_value: int, message=None) -> None:
-        if not self.cancelled:
-            progress = AsyncWorkerProgress()
-            progress.value = progress_value
-            progress.message = message
-            progress.id = self.id
-            self.signals.progress.emit(progress)
+        progress = AsyncWorkerProgress()
+        progress.value = progress_value
+        progress.message = message
+        progress.id = self.id
+        self.signals.progress.emit(progress)
+
+    def emit_start(self):
+        self.signals.started.emit(self.id)
 
     def get_default_results(self, clear=True) -> AsyncWorkerResults:
         if clear:
@@ -68,8 +62,6 @@ class AsyncWorker(QRunnable):
         return self.result
 
     def complete(self, **kwargs) -> None:
-        if self.cancelled:
-            return
         self.get_default_results(clear=False)
         if self.result_type == AsyncWorkerResults:
             self.result.results_dict = kwargs
