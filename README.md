@@ -4,6 +4,8 @@ Created by Zack Johnson
 
 ## Under construction, not yet ready for use!!
 
+Full documentation can be found on ReadTheDocs
+
 PySink is an extension of the PySide6 Qt Framework that simplifies the implementation
 of Asynchronous tasks in Desktop Applications. It contains several
 helper Widgets and Classes that enable you to build powerful and professional
