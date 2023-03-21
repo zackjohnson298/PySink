@@ -38,7 +38,7 @@ jobs:
         pip install twine
         pip install wheel
     - name: Build package using Setup
-      run: python setup.py sdist bdist_wheel
+      run: python old_setup.py sdist bdist_wheel
     - name: Publish package
       uses: pypa/gh-action-pypi-publish@27b31702a0e7fc50959f5ad993c78deac1bdfc29
       with:
@@ -55,7 +55,7 @@ jobs:
 #        password: ${{ secrets.PYPI_TEST_API_KEY }}
 #        # Build requirements
 ##         requirements: # optional, default is twine wheel
-#        # `setup.py` command to run ("true" is a shortcut for "clean sdist -d <dist_dir> bdist_wheel -d <dist_dir>")
+#        # `old_setup.py` command to run ("true" is a shortcut for "clean sdist -d <dist_dir> bdist_wheel -d <dist_dir>")
 ##         build: # optional
 #        # `pip` command to run ("true" is a shortcut for "wheel -w <dist_dir> --no-deps .")
 ##         pip: # optional
