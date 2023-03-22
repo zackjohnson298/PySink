@@ -5,6 +5,7 @@ import uuid
 
 
 class AsyncWorkerResults(object):
+    """Class to store the results of an AsyncWorker. Custom result types, inherit from this class."""
     errors = []
     warnings = []
     id = None
@@ -12,38 +13,74 @@ class AsyncWorkerResults(object):
 
 
 class AsyncWorkerProgress:
+    """Class to store the progress of an AsyncWorker."""
     value: 0
     message: None
     id: None
 
 
 class AsyncWorkerSignals(QObject):
+    """Class to store the signals of an AsyncWorkers. For custom signals, inherit from this class."""
     started = Signal(str)
     progress = Signal(AsyncWorkerProgress)
     finished = Signal(AsyncWorkerResults)
 
 
 class AsyncWorker(QRunnable):
-    def __init__(self, identifier=None, result_type=AsyncWorkerResults):
+    """A class that represents an Asynchronous Worker. Workers should inherit from this class
+    and perform their long-running tasks by overriding the self.run() method..
+
+    :param identifier: A unique identifier to differential this worker from other workers
+    :type identifier: Any, optional
+    :param result_type: The type that the results should be output in. Defaults to AsyncWorkerResults
+    :type result_type: type:'AsyncWorkerResults', optional
+    :param signal_type: The type of the self.signals attribute. Defaults to AsyncWorkerSignals
+    :type signal_type: type:'AsyncWorkerSignals', optional
+    """
+
+    def __init__(self, identifier=None, result_type=AsyncWorkerResults, signal_type=AsyncWorkerSignals):
+        """Constructor method
+        """
         super(AsyncWorker, self).__init__()
         self.errors: list = []
         self.warnings: list = []
         self.id = identifier if identifier is not None else str(uuid.uuid4())
-        self.signals = AsyncWorkerSignals()
+        self.signals = signal_type()
         self.result = result_type()
         self.result_type = result_type
 
     @Slot()
     def run(self) -> None:
-        time.sleep(5)
+        """Performs the worker's long-running task. Custom Workers should override this method. This will perform a
+        demo task of counting to 5 at a one-second interval.
+        """
+        self.emit_start()
+        progress = 5
+        self.update_progress(progress, 'Starting')
+        for ii in range(5):
+            time.sleep(1)
+            progress += 90 / 5
+            self.update_progress(progress, f'Step {ii+1}')
         self.complete()
 
     def reset(self) -> None:
+        """Resets the worker's state. All warnings and errors will be cleared, and self.result will be reset to the
+        defined result type.
+        """
+
         self.errors = []
         self.warnings = []
         self.result = self.result_type()
 
-    def update_progress(self, progress_value: int, message=None) -> None:
+    def update_progress(self, progress_value: int, message='') -> None:
+        """Emits the progress value and message. These values are emitted via the self.signals.progress signal..
+
+        :param progress_value: The current progress value. For discrete behavior, this value should be [0, 100]. For indeterminate behavior, this value should be -1.
+        :type progress_value: int
+        :param message: A message describing the current progress stage of the worker ('Downloading', 'Calculating', etc).
+        :type message: str, optional
+        """
+
         progress = AsyncWorkerProgress()
         progress.value = progress_value
         progress.message = message
@@ -51,18 +88,24 @@ class AsyncWorker(QRunnable):
         self.signals.progress.emit(progress)
 
     def emit_start(self):
+        """Signals that the worker's long-running task has started. This is signalled via self.signals.started.
+        Calling this is completely optional, and does not affect the functionality of the worker.
+        """
+
         self.signals.started.emit(self.id)
 
-    def get_default_results(self, clear=True) -> AsyncWorkerResults:
-        if clear:
-            self.result = self.result_type()
-        self.result.errors = self.errors
-        self.result.warnings = self.warnings
-        self.result.id = self.id
-        return self.result
-
     def complete(self, **kwargs) -> None:
-        self.get_default_results(clear=False)
+        """Signals the completion of the worker's long-running task. This should be called at the end of the overridden
+        self.run() method. By default, the kwargs provided will be output in the result.results_dict dictionary.
+        However, if a custom result type was provided, the provided kwargs will be mapped to the attributes of the
+        custom result type. In this case, the kwargs MUST match the defined attributes of the custom return type..
+
+        :param kwargs: Result values to be output defined as kwarg
+        :raises AttributeError: If a custom return type is defined, the kwargs parameters MUST match the attributes of the return type, else
+            an AttributeError will be raised.
+        """
+
+        self._load_default_results(clear=False)
         if self.result_type == AsyncWorkerResults:
             self.result.results_dict = kwargs
         else:
@@ -70,3 +113,11 @@ class AsyncWorker(QRunnable):
                 getattr(self.result, key)
                 setattr(self.result, key, kwargs[key])
         self.signals.finished.emit(self.result)
+
+    def _load_default_results(self, clear=True) -> AsyncWorkerResults:
+        if clear:
+            self.result = self.result_type()
+        self.result.errors = self.errors
+        self.result.warnings = self.warnings
+        self.result.id = self.id
+        return self.result

@@ -10,7 +10,7 @@ class CancellableAsyncWorker(AsyncWorker):
         self.errors.append('Cancelled')
         self.warnings.append('Cancelled')
         self.cancelled = True
-        self.signals.finished.emit(self.get_default_results())
+        self.signals.finished.emit(self._load_default_results())
 
     def reset(self):
         self.cancelled = False
