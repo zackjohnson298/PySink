@@ -10,7 +10,9 @@ Welcome to PySink's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-
+   intro
+   PySink
+   examples
 
 Indices and tables
 ==================

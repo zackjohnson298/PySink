@@ -4,20 +4,19 @@ from PySink.CancellableAsyncWorker import CancellableAsyncWorker
 
 
 class AsyncManager(QObject):
-    """Class that manages all AsyncWorkers and their corresponding threads. The manager can also cancel workers by id,
-    cancel all active (and cancellable) workers, and the worker's signals can also be accessed via the manager.
-    All threads/workers will be garbage collected upon completion..
-    """
-
-    #: Signal: Signals that a worker has finished.
-    worker_finished_signal = Signal(AsyncWorkerResults)
+    #: Signal: Signals that a worker has started its task. Contains the id of the worker.
+    worker_started_signal = Signal(str)
     #: Signal: Signal that contains progress data for a worker.
     worker_progress_signal = Signal(AsyncWorkerProgress)
-    #: Signal: Signals that all workers have finished.
+    #: Signal: Signals that a worker has finished its task. Contains the results of the worker.
+    worker_finished_signal = Signal(AsyncWorkerResults)
+    #: Signal: Signals that all workers have finished their tasks.
     all_workers_complete_signal = Signal()
 
     def __init__(self):
-        """Constructor method
+        """Class that manages all AsyncWorkers and their corresponding threads. The manager can cancel workers by id,
+        cancel all active (and cancellable) workers, and the worker's signals can also be accessed via the manager.
+        All threads/workers will be garbage collected upon the worker's completion..
         """
         super(AsyncManager, self).__init__()
         self.threadpool = QThreadPool()
@@ -56,7 +55,8 @@ class AsyncManager(QObject):
         return ''
 
     def start_worker(self, worker: AsyncWorker) -> None:
-        """Starts the worker on a new thread. Once the worker is on the thread, the worker's .run() method is called..
+        """Starts the worker on a new thread (or queues the worker if there are no threads available).
+        Once the worker is on the thread, the worker's .run() method is called..
 
         :param worker: The worker to be run
         :type worker: AsyncWorker
@@ -65,6 +65,7 @@ class AsyncManager(QObject):
             raise KeyError(f'Worker with id: {worker.id} already running')
         worker.reset()
         worker.setAutoDelete(True)
+        worker.signals.started.connect(lambda worker_id=worker.id: self.worker_started_signal.emit(worker_id))
         worker.signals.progress.connect(self.worker_progress_signal.emit)
         worker.signals.finished.connect(self._worker_complete_callback)
         self.workers[worker.id] = worker

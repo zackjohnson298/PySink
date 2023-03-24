@@ -1,58 +1,68 @@
-from PySide6.QtCore import QRunnable, Signal, QObject, Slot, QMutex
-from typing import Optional, Any
+from PySide6.QtCore import QRunnable, Signal, QObject, Slot
+from typing import Optional
 import time
 import uuid
 
 
-class AsyncWorkerResults(object):
-    """Class to store the results of an AsyncWorker. Custom result types, inherit from this class."""
-    errors = []
+class AsyncWorkerResults:
+    """Class to store the results of an AsyncWorker. Custom result types should inherit from this class."""
+
+    #: list: Warnings encountered by the worker.
     warnings = []
+    #: list: Errors encountered by the worker.
+    errors = []
+    #: str: The worker's unique identifier
     id = None
+    #: dict: Results of the worker's task defined as key-value pairs.
     results_dict = {}
 
 
 class AsyncWorkerProgress:
     """Class to store the progress of an AsyncWorker."""
-    value: 0
-    message: None
-    id: None
+
+    #: Union[int, float]: Current progress value. For determinate progress, value should be [0, 100]. Indeterminate progress value should be -1.
+    value = 0
+    #: str, optional: Status message about the worker's progress (Downloading, Calculating, etc).
+    message: str = None
+    #: str: The worker's unique identifier.
+    id: str = None
 
 
 class AsyncWorkerSignals(QObject):
     """Class to store the signals of an AsyncWorkers. For custom signals, inherit from this class."""
+
+    #: Signal(str): Signals that the worker has started its task. Contains the workers unique identified.
     started = Signal(str)
+    #: Signal(:class:`~AsyncWorkerProgress`): Signal that contains progress information for the worker.
     progress = Signal(AsyncWorkerProgress)
+    #: Signal(:class:`~AsyncWorkerResults`): Signals that a worker has finished its task and contains the results of the worker's task.
     finished = Signal(AsyncWorkerResults)
 
 
 class AsyncWorker(QRunnable):
-    """A class that represents an Asynchronous Worker. Workers should inherit from this class
-    and perform their long-running tasks by overriding the self.run() method..
+    def __init__(self, identifier: Optional[str] = None, result_type=AsyncWorkerResults, signal_type=AsyncWorkerSignals):
+        """A class that represents an Asynchronous Worker. Workers should inherit from this class
+        and perform their long-running tasks by overriding the :meth:`~run` method..
 
-    :param identifier: A unique identifier to differential this worker from other workers
-    :type identifier: Any, optional
-    :param result_type: The type that the results should be output in. Defaults to AsyncWorkerResults
-    :type result_type: type:'AsyncWorkerResults', optional
-    :param signal_type: The type of the self.signals attribute. Defaults to AsyncWorkerSignals
-    :type signal_type: type:'AsyncWorkerSignals', optional
-    """
-
-    def __init__(self, identifier=None, result_type=AsyncWorkerResults, signal_type=AsyncWorkerSignals):
-        """Constructor method
+        :param identifier: A unique identifier to differentiate this worker from other workers. Defaults to a uuid4 string
+        :type identifier: str, optional
+        :param result_type: The type that the results should be output in. Defaults to :class:`~AsyncWorkerResults`
+        :type result_type: class, optional
+        :param signal_type: The type of the :attr:`~signals` attribute. Defaults to :class:`~AsyncWorkerSignals`
+        :type signal_type: class, optional
         """
         super(AsyncWorker, self).__init__()
         self.errors: list = []
         self.warnings: list = []
-        self.id = identifier if identifier is not None else str(uuid.uuid4())
-        self.signals = signal_type()
-        self.result = result_type()
+        self.id: str = identifier if identifier is not None else str(uuid.uuid4())
+        self.signals: signal_type = signal_type()
+        self.result: result_type = result_type()
         self.result_type = result_type
 
     @Slot()
     def run(self) -> None:
-        """Performs the worker's long-running task. Custom Workers should override this method. This will perform a
-        demo task of counting to 5 at a one-second interval.
+        """Performs the worker's long-running task. Custom Workers should override this method. By default, this will
+        perform a demo task of counting to 5 at a one-second interval.
         """
         self.emit_start()
         progress = 5
@@ -64,47 +74,50 @@ class AsyncWorker(QRunnable):
         self.complete()
 
     def reset(self) -> None:
-        """Resets the worker's state. All warnings and errors will be cleared, and self.result will be reset to the
+        """Resets the worker's state. All warnings and errors will be cleared, and :attr:`~result` will be reset to the
         defined result type.
         """
-
         self.errors = []
         self.warnings = []
         self.result = self.result_type()
 
     def update_progress(self, progress_value: int, message='') -> None:
-        """Emits the progress value and message. These values are emitted via the self.signals.progress signal..
+        """Emits the progress value and message. These values are emitted via the
+        :attr:`self.signals.progress<AsyncWorkerSignals.progress>` signal..
 
-        :param progress_value: The current progress value. For discrete behavior, this value should be [0, 100]. For indeterminate behavior, this value should be -1.
+        :param progress_value: The current progress value. For discrete behavior, this value should be [0, 100].
+            For indeterminate behavior, this value should be -1.
         :type progress_value: int
         :param message: A message describing the current progress stage of the worker ('Downloading', 'Calculating', etc).
         :type message: str, optional
         """
-
         progress = AsyncWorkerProgress()
         progress.value = progress_value
         progress.message = message
         progress.id = self.id
         self.signals.progress.emit(progress)
 
-    def emit_start(self):
-        """Signals that the worker's long-running task has started. This is signalled via self.signals.started.
-        Calling this is completely optional, and does not affect the functionality of the worker.
+    def emit_start(self) -> None:
+        """This method can be called within :meth:`~run` to let the application know that the long-running task has
+        begun (this is signalled via the :attr:`self.signals.started<AsyncWorkerSignals.started>` signal). Calling
+        this method is completely optional and does not affect the functionality of the worker.
         """
-
         self.signals.started.emit(self.id)
 
     def complete(self, **kwargs) -> None:
         """Signals the completion of the worker's long-running task. This should be called at the end of the overridden
-        self.run() method. By default, the kwargs provided will be output in the result.results_dict dictionary.
-        However, if a custom result type was provided, the provided kwargs will be mapped to the attributes of the
-        custom result type. In this case, the kwargs MUST match the defined attributes of the custom return type..
+        :meth:`~run` method. Calling this method emits the worker's results via the
+        :attr:`self.signals.finished<AsyncWorkerSignals.signal>` signal.
 
-        :param kwargs: Result values to be output defined as kwarg
-        :raises AttributeError: If a custom return type is defined, the kwargs parameters MUST match the attributes of the return type, else
-            an AttributeError will be raised.
+        By default, the kwargs provided will be packaged into :attr:`results.results_dict<AsyncWorkerResults.results_dict>`
+        as key-value pairs. However, if a custom result type was defined within :meth:`__init__()<AsyncWorker>`, the
+        provided kwargs will be mapped to the attributes of the custom result type. In this scenario, the kwargs MUST
+        match the defined attributes of the custom return type..
+
+        :param kwargs: Result values to be emitted, defined as key-word arguments
+        :raises AttributeError: If a custom return type is defined, the keys in kwargs MUST match the attributes of
+            the return type, else an AttributeError will be raised.
         """
-
         self._load_default_results(clear=False)
         if self.result_type == AsyncWorkerResults:
             self.result.results_dict = kwargs

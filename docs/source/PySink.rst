@@ -1,45 +1,39 @@
-PySink package
+Documentation
 ==============
 
-Subpackages
------------
-
-.. toctree::
-   :maxdepth: 4
-
-   PySink.Widgets
-
-Submodules
-----------
-
-PySink.AsyncManager module
---------------------------
-
-.. automodule:: PySink.AsyncManager
+The ``AsyncWorker`` Class
+****************************
+.. autoclass:: PySink.AsyncWorker
    :members:
-   :undoc-members:
    :show-inheritance:
 
-PySink.AsyncWorker module
--------------------------
+The ``AsyncManager`` Class
+****************************
+.. autoclass:: PySink.AsyncManager
+    :members:
+    :show-inheritance:
 
-.. automodule:: PySink.AsyncWorker
+The ``AsyncWorkerResults`` Class
+************************************
+.. autoclass:: PySink.AsyncWorkerResults
    :members:
-   :undoc-members:
    :show-inheritance:
 
-PySink.CancellableAsyncWorker module
-------------------------------------
-
-.. automodule:: PySink.CancellableAsyncWorker
+The ``AsyncWorkerProgress`` Class
+************************************
+.. autoclass:: PySink.AsyncWorkerProgress
    :members:
-   :undoc-members:
    :show-inheritance:
 
-Module contents
----------------
-
-.. automodule:: PySink
+The ``AsyncWorkerSignals`` Class
+************************************
+.. autoclass:: PySink.AsyncWorkerSignals
    :members:
-   :undoc-members:
    :show-inheritance:
+
+The ``CancellableAsyncWorker`` Class
+************************************
+.. autoclass:: PySink.CancellableAsyncWorker
+   :members:
+   :show-inheritance:
+
