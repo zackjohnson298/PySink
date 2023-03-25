@@ -1,4 +1,4 @@
-from PySink import AsyncWorkerProgress
+from PySink.Objects import AsyncWorkerProgress
 from PySink.Widgets import ProgressBarWidget
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QMainWindow, QPushButton, QVBoxLayout, QWidget, QLabel, QHBoxLayout

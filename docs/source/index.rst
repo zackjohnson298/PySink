@@ -3,16 +3,29 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to PySink's documentation!
+PySink
 ==================================
+An extension of PySide6 that simplifies Asynchronous behaviors in Desktop Applications
+
+.. include:: overview.rst
+
+Table of Contents
+=================
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+   :maxdepth: 1
+   :caption: General
 
-   intro
-   PySink
-   examples
+   overview
+
+.. toctree::
+   :maxdepth: 1
+   :caption: PySink
+
+   PySink/api
+   PySink/datatypes
+   PySink/widgets
+   PySink/examples
 
 Indices and tables
 ==================

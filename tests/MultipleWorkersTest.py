@@ -83,7 +83,7 @@ class MainController:
         # Connect Slots
         self.view.start_button.clicked.connect(self.start_workers)
         self.view.cancel_clicked.connect(lambda row_index: self.async_manager.cancel_worker(self.worker_row_indices[row_index]))
-        self.async_manager.all_workers_complete_signal.connect(lambda: self.view.start_button.setEnabled(True))
+        self.async_manager.all_workers_finished_signal.connect(lambda: self.view.start_button.setEnabled(True))
         # Initialize UI
         for widget in self.view.progress_widgets:
             widget.setVisible(False)

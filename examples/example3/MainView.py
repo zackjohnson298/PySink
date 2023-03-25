@@ -1,8 +1,7 @@
-from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import QMainWindow, QVBoxLayout, QPushButton, QWidget, QGridLayout, QLabel
 from PySide6.QtCore import Signal
 
-from PySink import AsyncWorkerProgress
+from PySink.Objects import AsyncWorkerProgress
 from PySink.Widgets import ProgressBarWidget
 
 

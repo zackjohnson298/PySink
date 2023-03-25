@@ -1,22 +1,29 @@
 from PySide6.QtCore import Signal, QObject, QThreadPool
-from PySink.AsyncWorker import AsyncWorker, AsyncWorkerResults, AsyncWorkerProgress
+from PySink.AsyncWorker import AsyncWorker
+from PySink.Objects import AsyncWorkerResults, AsyncWorkerProgress
 from PySink.CancellableAsyncWorker import CancellableAsyncWorker
 
 
 class AsyncManager(QObject):
-    #: Signal: Signals that a worker has started its task. Contains the id of the worker.
+    #: Signal(str): Signals that a worker has started its task. Contains the id of the worker.
     worker_started_signal = Signal(str)
-    #: Signal: Signal that contains progress data for a worker.
+    #: Signal(:class:`~AsyncWorkerProgress`): Signal that contains progress data for a worker.
     worker_progress_signal = Signal(AsyncWorkerProgress)
-    #: Signal: Signals that a worker has finished its task. Contains the results of the worker.
+    #: Signal(:class:`~AsyncWorkerResults`): Signals that a worker has finished its task. Contains the results of the worker.
     worker_finished_signal = Signal(AsyncWorkerResults)
-    #: Signal: Signals that all workers have finished their tasks.
-    all_workers_complete_signal = Signal()
+    #: Signal(): Signals that all workers have finished their tasks.
+    all_workers_finished_signal = Signal()
 
     def __init__(self):
-        """Class that manages all AsyncWorkers and their corresponding threads. The manager can cancel workers by id,
-        cancel all active (and cancellable) workers, and the worker's signals can also be accessed via the manager.
-        All threads/workers will be garbage collected upon the worker's completion..
+        """Class that manages all :class:`workers<AsyncWorker>` and their corresponding threads. Once a worker is created,
+        provide it to the :meth:`~start_worker` method to start the worker's long-running task. If the worker is of
+        type :class:`~CancellableAsyncWorker`, it can be cancelled by passing the worker's
+        :attr:`id<CancellableAsyncWorker.id>` to the :meth:`~cancel_worker` method. All threads/workers will be
+        garbage collected upon completion.
+
+        Worker signals are also exposed via the provided signal attributes :attr:`~worker_started_signal` ,
+        :attr:`~worker_progress_signal` , and :attr:`~worker_finished_signal` . Once all active workers are complete,
+        the manager will emit its :attr:`~all_workers_finished_signal`
         """
         super(AsyncManager, self).__init__()
         self.threadpool = QThreadPool()
@@ -56,13 +63,14 @@ class AsyncManager(QObject):
 
     def start_worker(self, worker: AsyncWorker) -> None:
         """Starts the worker on a new thread (or queues the worker if there are no threads available).
-        Once the worker is on the thread, the worker's .run() method is called..
+        Once the worker is on the thread, the worker's :meth:`~AsyncWorker.run` method is called..
 
         :param worker: The worker to be run
         :type worker: AsyncWorker
+        :raises Exception: Raised if a worker is provided that has the same id as one that is already running.
         """
         if worker.id in self.workers:
-            raise KeyError(f'Worker with id: {worker.id} already running')
+            raise Exception(f'Worker with id: {worker.id} already running')
         worker.reset()
         worker.setAutoDelete(True)
         worker.signals.started.connect(lambda worker_id=worker.id: self.worker_started_signal.emit(worker_id))
@@ -77,5 +85,18 @@ class AsyncManager(QObject):
             self.worker_finished_signal.emit(results)
             self.workers.pop(worker_id)
             if len(self.workers) == 0:
-                self.all_workers_complete_signal.emit()
+                self.all_workers_finished_signal.emit()
 
+
+if __name__ == '__main__':
+    from PySide6.QtWidgets import QApplication
+    import sys
+
+    app = QApplication()
+    demo_worker = AsyncWorker()
+    demo_worker.signals.progress.connect(print)
+    demo_worker.signals.finished.connect(print)
+    demo_manager = AsyncManager()
+    demo_manager.all_workers_finished_signal.connect(sys.exit)
+    demo_manager.start_worker(demo_worker)
+    app.exec()

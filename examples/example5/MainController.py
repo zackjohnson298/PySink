@@ -1,4 +1,4 @@
-from PySink import AsyncManager, AsyncWorkerResults, AsyncWorkerProgress
+from PySink import AsyncManager, AsyncWorkerResults
 from MainView import MainView
 from DemoAsyncWorker5 import DemoAsyncWorker5
 from random import randint
@@ -12,7 +12,7 @@ class MainController:
         self.view.start_signal.connect(self.start_workers)
         self.view.cancel_signal.connect(self.cancel_all_workers)
         self.view.closed.connect(self.cancel_all_workers)
-        self.async_manager.all_workers_complete_signal.connect(self.all_workers_complete_callback)
+        self.async_manager.all_workers_finished_signal.connect(self.all_workers_complete_callback)
         # Initialize UI
         self.view.hide_all_progress()
         self.view.start_button.setEnabled(True)

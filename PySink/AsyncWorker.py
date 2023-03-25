@@ -2,41 +2,7 @@ from PySide6.QtCore import QRunnable, Signal, QObject, Slot
 from typing import Optional
 import time
 import uuid
-
-
-class AsyncWorkerResults:
-    """Class to store the results of an AsyncWorker. Custom result types should inherit from this class."""
-
-    #: list: Warnings encountered by the worker.
-    warnings = []
-    #: list: Errors encountered by the worker.
-    errors = []
-    #: str: The worker's unique identifier
-    id = None
-    #: dict: Results of the worker's task defined as key-value pairs.
-    results_dict = {}
-
-
-class AsyncWorkerProgress:
-    """Class to store the progress of an AsyncWorker."""
-
-    #: Union[int, float]: Current progress value. For determinate progress, value should be [0, 100]. Indeterminate progress value should be -1.
-    value = 0
-    #: str, optional: Status message about the worker's progress (Downloading, Calculating, etc).
-    message: str = None
-    #: str: The worker's unique identifier.
-    id: str = None
-
-
-class AsyncWorkerSignals(QObject):
-    """Class to store the signals of an AsyncWorkers. For custom signals, inherit from this class."""
-
-    #: Signal(str): Signals that the worker has started its task. Contains the workers unique identified.
-    started = Signal(str)
-    #: Signal(:class:`~AsyncWorkerProgress`): Signal that contains progress information for the worker.
-    progress = Signal(AsyncWorkerProgress)
-    #: Signal(:class:`~AsyncWorkerResults`): Signals that a worker has finished its task and contains the results of the worker's task.
-    finished = Signal(AsyncWorkerResults)
+from PySink.Objects import AsyncWorkerResults, AsyncWorkerSignals, AsyncWorkerProgress
 
 
 class AsyncWorker(QRunnable):

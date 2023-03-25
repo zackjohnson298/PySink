@@ -1,5 +1,6 @@
 from PySide6.QtWidgets import QApplication
-from PySink import AsyncManager, AsyncWorkerProgress, AsyncWorkerResults
+from PySink import AsyncManager, AsyncWorkerResults
+from PySink.Objects import AsyncWorkerProgress
 from DemoAsyncWorker1 import DemoAsyncWorker1
 import sys
 
