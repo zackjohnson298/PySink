@@ -3,14 +3,31 @@ from PySink import AsyncWorker
 
 class CancellableAsyncWorker(AsyncWorker):
     def __init__(self, *args, **kwargs):
+        """A class that represents a cancellable AsyncWorker. Any workers that need to be cancellable should
+        inherit from this class. CancellableAsyncWorker inherits from :class:`AsyncWorker`, and offers the ability to
+        cancel the worker's task at any time by calling the :meth:`~cancel` method.
+
+        IMPORTANT NOTE: While calling :meth:`~cancel` effectively halts the worker's task, it DOES NOT terminate the
+        execution of :meth:`~run` (doing so could result in unwanted data corruption). Within :meth:`~run`, you should
+        poll the :attr:`~cancelled` flag intermittently and return early if it is set to True.
+        """
         super(CancellableAsyncWorker, self).__init__(*args, **kwargs)
         self.cancelled: bool = False
 
     def cancel(self) -> None:
+        """Cancels the worker. A 'Cancelled' message is appended to both :attr:`~PySink.AsyncWorkerResults.warnings`
+        and :attr:`~PySink.AsyncWorkerResults.errors`, and the :attr:`~PySink.AsyncWorkerSignals.finished` signal is
+        emitted (similar to calling :meth:`~complete`). Once this method is called, all internal method calls/signal
+        updates will be ignored, and an internal flag called :attr:`~cancelled` is set to True.
+
+        IMPORTANT NOTE: While calling :meth:`~cancel` effectively halts the worker's task, it DOES NOT terminate the
+        execution of :meth:`~run` (doing so could result in unwanted data corruption). Within :meth:`~run`, you should
+        poll the :attr:`~cancelled` flag intermittently and return early if it is set.
+        """
         self.errors.append('Cancelled')
         self.warnings.append('Cancelled')
         self.cancelled = True
-        self.signals.finished.emit(self.get_default_results())
+        self.signals.finished.emit(self._load_default_results())
 
     def reset(self):
         self.cancelled = False

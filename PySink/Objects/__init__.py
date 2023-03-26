@@ -1,0 +1,3 @@
+from PySink.Objects.AsyncWorkerResults import AsyncWorkerResults
+from PySink.Objects.AsyncWorkerProgress import AsyncWorkerProgress
+from PySink.Objects.AsyncWorkerSignals import AsyncWorkerSignals
