@@ -2,13 +2,13 @@ from PySink import AsyncWorker, AsyncWorkerResults
 import time
 
 
-class DemoAsyncWorker3Results(AsyncWorkerResults):
+class CustomWorker1Results(AsyncWorkerResults):
     demo_result = None
 
 
-class DemoAsyncWorker3(AsyncWorker):
+class CustomWorker1(AsyncWorker):
     def __init__(self, delay_seconds: int, cycles=4):
-        super(DemoAsyncWorker3, self).__init__(result_type=DemoAsyncWorker3Results)
+        super(CustomWorker1, self).__init__(result_type=CustomWorker1Results)
         self.delay_seconds = delay_seconds
         self.cycles = cycles
 
@@ -21,7 +21,7 @@ class DemoAsyncWorker3(AsyncWorker):
             self.update_progress(progress, f'Progress message #{ii + 1}')
 
         # Setting results directly
-        self.result.demo_result = 12
+        self.results.demo_result = 12
         self.complete()
 
         # Passing results as kwargs

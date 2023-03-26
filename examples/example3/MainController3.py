@@ -1,11 +1,11 @@
 from PySink import AsyncManager, AsyncWorkerResults
-from MainView import MainView
-from DemoAsyncWorker5 import DemoAsyncWorker5
+from MainView3 import MainView3
+from CustomWorker3 import CustomWorker3
 from random import randint
 
 
-class MainController:
-    def __init__(self, view: MainView):
+class MainController3:
+    def __init__(self, view: MainView3):
         self.view = view
         self.async_manager = AsyncManager()
         # Connect Slots
@@ -26,11 +26,11 @@ class MainController:
             # Set UI State
             row_item.reset()
             # Initialize Worker
-            worker = DemoAsyncWorker5(cycles=randint(3, 6), delay_seconds=0.1 * randint(5, 10))
+            worker = CustomWorker3(cycles=randint(3, 6), delay_seconds=0.1 * randint(5, 10))
             # Connect UI Signals
             row_item.cancel_signal.connect(worker.cancel)
             # Connect Worker's Signals
-            worker.signals.progress.connect(row_item.update_progress)
+            worker.signals.progress.connect(row_item.set_progress)
             worker.signals.finished.connect(lambda results, r_index=row_index: self.worker_complete(results, r_index))
             # Since some workers may be queued, it's good practice to not show progress until the worker starts
             worker.signals.started.connect(row_item.show_progress)
@@ -39,7 +39,9 @@ class MainController:
 
     def worker_complete(self, results: AsyncWorkerResults, row_index):
         self.view.row_items[row_index].hide_progress()
-        self.view.row_items[row_index].set_result(f'Warnings: {results.warnings}, Errors: {results.errors}')
+        self.view.row_items[row_index].set_result(results.results_dict)
+        self.view.row_items[row_index].set_warnings(results.warnings)
+        self.view.row_items[row_index].set_errors(results.errors)
 
     def all_workers_complete_callback(self):
         self.view.start_button.setEnabled(True)

@@ -1,15 +1,15 @@
 from PySink import AsyncManager
-from DemoAsyncWorker3 import DemoAsyncWorker3, DemoAsyncWorker3Results
-from MainView import MainView
+from CustomWorker1 import CustomWorker1, CustomWorker1Results
+from MainView1 import MainView1
 
 
-class MainController:
-    def __init__(self, view: MainView):
+class MainController1:
+    def __init__(self, view: MainView1):
         self.view = view
         # Create an AsyncManager and save it as an attribute
         self.async_manager = AsyncManager()
         # Connect UI Signals
-        self.view.button_pushed_signal.connect(self.start_worker)
+        self.view.start_signal.connect(self.start_worker)
         # Connect Async Signals
         self.async_manager.worker_progress_signal.connect(self.view.set_progress)
         self.async_manager.worker_finished_signal.connect(self.worker_complete_callback)
@@ -21,10 +21,10 @@ class MainController:
         self.view.clear()
         self.view.show_progress()
         # Initialize/Start Worker
-        worker = DemoAsyncWorker3(2, cycles=5)
+        worker = CustomWorker1(2, cycles=5)
         self.async_manager.start_worker(worker)
 
-    def worker_complete_callback(self, results: DemoAsyncWorker3Results):
+    def worker_complete_callback(self, results: CustomWorker1Results):
         # Set UI State
         self.view.clear()
         self.view.hide_progress()

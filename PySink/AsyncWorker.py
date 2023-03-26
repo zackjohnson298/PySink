@@ -22,7 +22,7 @@ class AsyncWorker(QRunnable):
         self.warnings: list = []
         self.id: str = identifier if identifier is not None else str(uuid.uuid4())
         self.signals: signal_type = signal_type()
-        self.result: result_type = result_type()
+        self.results: result_type = result_type()
         self.result_type = result_type
 
     @Slot()
@@ -45,7 +45,7 @@ class AsyncWorker(QRunnable):
         """
         self.errors = []
         self.warnings = []
-        self.result = self.result_type()
+        self.results = self.result_type()
 
     def update_progress(self, progress_value: int, message='') -> None:
         """Emits the progress value and message. These values are emitted via the
@@ -86,17 +86,17 @@ class AsyncWorker(QRunnable):
         """
         self._load_default_results(clear=False)
         if self.result_type == AsyncWorkerResults:
-            self.result.results_dict = kwargs
+            self.results.results_dict = kwargs
         else:
             for key in kwargs:
-                getattr(self.result, key)
-                setattr(self.result, key, kwargs[key])
-        self.signals.finished.emit(self.result)
+                getattr(self.results, key)
+                setattr(self.results, key, kwargs[key])
+        self.signals.finished.emit(self.results)
 
     def _load_default_results(self, clear=True) -> AsyncWorkerResults:
         if clear:
-            self.result = self.result_type()
-        self.result.errors = self.errors
-        self.result.warnings = self.warnings
-        self.result.id = self.id
-        return self.result
+            self.results = self.result_type()
+        self.results.errors = self.errors
+        self.results.warnings = self.warnings
+        self.results.id = self.id
+        return self.results

@@ -2,9 +2,9 @@ from PySink import CancellableAsyncWorker
 import time
 
 
-class DemoAsyncWorker5(CancellableAsyncWorker):
+class CustomWorker3(CancellableAsyncWorker):
     def __init__(self, delay_seconds, cycles=5):
-        super(DemoAsyncWorker5, self).__init__()
+        super(CustomWorker3, self).__init__()
         self.count = cycles
         self.delay_seconds = delay_seconds
 

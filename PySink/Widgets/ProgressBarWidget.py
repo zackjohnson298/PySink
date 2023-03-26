@@ -3,15 +3,13 @@ from typing import Union
 from PySide6.QtWidgets import QWidget, QProgressBar, QLabel, QGridLayout
 from PySide6.QtCore import Qt
 from PySink.Objects.AsyncWorkerProgress import AsyncWorkerProgress
-from PySink.AsyncWorker import AsyncWorker
-from PySink.AsyncManager import AsyncManager
 import platform
 
 
 class ProgressBarWidget(QWidget):
     def __init__(self, parent=None):
         """An implementation of a PySide6 Progress Bar. This has a couple helper functions that are natively
-        compatible with PySink, allowing you to easily display the progress of an :class:`~AsyncWorker`.
+        compatible with PySink, allowing you to easily display the progress of an :class:`~PySink.AsyncWorker`.
 
         :param parent: The parent widget
         :type parent: QWidget, optional
@@ -36,6 +34,11 @@ class ProgressBarWidget(QWidget):
         self.setLayout(layout)
         # self.setContentsMargins(0, 0, 0, 0)
 
+    def reset(self) -> None:
+        """Resets the state of the Progress Bar and clears current label text"""
+        self.progress_bar.reset()
+        self.label.clear()
+
     def set_value(self, progress_value: Union[int, float]) -> None:
         """Sets the current progress value...
 
@@ -58,11 +61,11 @@ class ProgressBarWidget(QWidget):
             self.label.setText(message)
 
     def update_progress(self, progress: AsyncWorkerProgress) -> None:
-        """Updates the current progress to be displayed. This is natively emitted by an :class:`~AsyncWorker` (and the
-        :class:`~AsyncManager`), so the emitted progress can be passed directly to this method...
+        """Updates the current progress to be displayed. This is natively emitted by an :class:`~PySink.AsyncWorker` (and the
+        :class:`~PySink.AsyncManager`), so the emitted progress can be passed directly to this method...
 
         :param progress: The current progress
-        :type progress: :class:`~AsyncWorkerProgress`
+        :type progress: :class:`~PySink.AsyncWorkerProgress`
         """
         self.set_value(progress.value)
         self.set_text(progress.message)

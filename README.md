@@ -249,7 +249,7 @@ as a script on its own and see the window you've just created. Doing this allows
 sure the UI looks correct before you connect any actions to the View. 
 Run the script to see the app window:
 
-![alt text](img/example2_main_view.png "Title")
+![alt text](docs/img/example2_main_view.png "Title")
 
 This very simple app has a start button, progress bar, and some labels to display the data.
 The View also has a signal that gets emitted on the button press, as well as a 
@@ -275,7 +275,7 @@ class MainController:
         self.view = view
         self.async_manager = AsyncManager()
         # Connect UI Signals
-        self.view.button_pushed_signal.connect(self.start_task)
+        self.view.start_signal.connect(self.start_task)
         # Connect Async Signals
         self.async_manager.worker_progress_signal.connect(self.view.set_progress)
         self.async_manager.worker_finished_signal.connect(self.task_complete_callback)
@@ -315,7 +315,7 @@ class MainController:
         self.view = view
         self.async_manager = AsyncManager()
         # Connect UI Signals
-        self.view.button_pushed_signal.connect(self.start_task)
+        self.view.start_signal.connect(self.start_task)
         # Connect Async Signals
         self.async_manager.worker_progress_signal.connect(self.view.set_progress)
         self.async_manager.worker_finished_signal.connect(self.task_complete_callback)
@@ -402,9 +402,9 @@ app.exec()
 Run the script and the application will start. Pushing the start button within the app will 
 trigger the long-running task, and at its completion data from the worker will be displayed:
 
-![alt text](img/example2_while_running.png "Title")
+![alt text](docs/img/example2_while_running.png "Title")
 
-![alt text](img/example2_complete.png "Title")
+![alt text](docs/img/example2_complete.png "Title")
 
 
 Congratulations! You've just created an asynchronous app with PySink!

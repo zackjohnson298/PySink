@@ -1,14 +1,10 @@
 from PySide6.QtWidgets import QApplication
-from MainController import MainController
-from MainView import MainView
+from MainController3 import MainController3
+from MainView3 import MainView3
 
 
 app = QApplication()
-# Create the View
-view = MainView()
-# Create the Controller, passing in the View
-controller = MainController(view)
-# Show the View
+view = MainView3(row_count=10)
+controller = MainController3(view)
 view.show()
-# Start the App event loop
 app.exec()
