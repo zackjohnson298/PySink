@@ -20,20 +20,22 @@ Table of Contents
 
 .. toctree::
    :maxdepth: 1
-   :caption: PySink
-
-   pysink/api
-   pysink/datatypes
-   pysink/widgets
-
-.. toctree::
-   :maxdepth: 1
    :caption: Examples
 
    examples/basic
    examples/example1
    examples/example2
    examples/example3
+
+.. toctree::
+   :maxdepth: 1
+   :caption: PySink
+
+   pysink/api
+   pysink/datatypes
+   pysink/widgets
+
+
 
 Indices and tables
 ==================

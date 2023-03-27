@@ -5,7 +5,8 @@ Let's start by using the :class:`~PySink.AsyncWorker` 's default task to see the
 those signals by connecting them to callbacks. By default, the :class:`~PySink.AsyncWorker` will perform a demo task of
 counting to five with a delay of 1 second between counts. Generally a worker emits three kinds of signals,
 a :attr:`~PySink.AsyncWorkerSignals.started` signal, a :attr:`~PySink.AsyncWorkerSignals.progress` signal, and a
-:attr:`~PySink.AsyncWorkerSignals.finished` signal.
+:attr:`~PySink.AsyncWorkerSignals.finished` signal (you can also define/emit custom signals, but more on that
+:ref:`later<basic-part-d>`).
 
 The :attr:`~PySink.AsyncWorkerSignals.started` signal indicates that a worker has started it's long-running task. It
 contains the id of the worker, which can be used to differentiate between active workers. Note that to emit this signal,
