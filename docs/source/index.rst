@@ -25,7 +25,15 @@ Table of Contents
    pysink/api
    pysink/datatypes
    pysink/widgets
-   pysink/examples
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Examples
+
+   examples/basic
+   examples/example1
+   examples/example2
+   examples/example3
 
 Indices and tables
 ==================
