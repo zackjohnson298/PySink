@@ -8,8 +8,9 @@ class CancellableAsyncWorker(AsyncWorker):
         cancel the worker's task at any time by calling the :meth:`~cancel` method.
 
         IMPORTANT NOTE: While calling :meth:`~cancel` effectively halts the worker's task, it DOES NOT terminate the
-        execution of :meth:`~run` (doing so could result in unwanted data corruption). Within :meth:`~run`, you should
-        poll the :attr:`~cancelled` flag intermittently and return early if it is set to True.
+        execution of :meth:`run()<AsyncWorker.run>` (doing so could result in unwanted data corruption). Within
+        :meth:`run()<AsyncWorker.run>`, you should poll the :attr:`~cancelled` flag intermittently and return early if
+        it is True.
         """
         super(CancellableAsyncWorker, self).__init__(*args, **kwargs)
         self.cancelled: bool = False
@@ -21,8 +22,9 @@ class CancellableAsyncWorker(AsyncWorker):
         updates will be ignored, and an internal flag called :attr:`~cancelled` is set to True.
 
         IMPORTANT NOTE: While calling :meth:`~cancel` effectively halts the worker's task, it DOES NOT terminate the
-        execution of :meth:`~run` (doing so could result in unwanted data corruption). Within :meth:`~run`, you should
-        poll the :attr:`~cancelled` flag intermittently and return early if it is set.
+        execution of :meth:`run()<AsyncWorker.run>` (doing so could result in unwanted data corruption). Within
+        :meth:`run()<AsyncWorker.run>`, you should poll the :attr:`~cancelled` flag intermittently and return early if
+        it is True.
         """
         self.errors.append('Cancelled')
         self.warnings.append('Cancelled')

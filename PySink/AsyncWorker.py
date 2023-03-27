@@ -73,7 +73,7 @@ class AsyncWorker(QRunnable):
     def complete(self, **kwargs) -> None:
         """Signals the completion of the worker's long-running task. This should be called at the end of the overridden
         :meth:`~run` method. Calling this method emits the worker's results via the
-        :attr:`self.signals.finished<AsyncWorkerSignals.signal>` signal.
+        :attr:`self.signals.finished<AsyncWorkerSignals.finished>` signal.
 
         By default, the kwargs provided will be packaged into :attr:`results.results_dict<AsyncWorkerResults.results_dict>`
         as key-value pairs. However, if a custom result type was defined within :meth:`__init__()<AsyncWorker>`, the
