@@ -22,10 +22,10 @@ Table of Contents
    :maxdepth: 1
    :caption: PySink
 
-   PySink/api
-   PySink/datatypes
-   PySink/widgets
-   PySink/examples
+   pysink/api
+   pysink/datatypes
+   pysink/widgets
+   pysink/examples
 
 Indices and tables
 ==================
