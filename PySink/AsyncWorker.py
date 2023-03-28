@@ -1,4 +1,4 @@
-from PySide6.QtCore import QRunnable, Signal, QObject, Slot
+from PySide6.QtCore import QRunnable, Slot
 from typing import Optional
 import time
 import uuid
@@ -22,6 +22,7 @@ class AsyncWorker(QRunnable):
         self.warnings: list = []
         self.id: str = identifier if identifier is not None else str(uuid.uuid4())
         self.signals: signal_type = signal_type()
+        self.signal_type = signal_type
         self.results: result_type = result_type()
         self.result_type = result_type
 
