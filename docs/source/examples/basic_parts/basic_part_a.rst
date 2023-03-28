@@ -1,7 +1,7 @@
 Part A - Starting an AsyncWorker
 ================================
 
-Let's start by using the :class:`~PySink.AsyncWorker` 's default task to see the signals it emits and how to receive
+Let's start by using the :class:`AsyncWorker's<PySink.AsyncWorker>` default task to see the signals it emits and how to receive
 those signals by connecting them to callbacks. By default, the :class:`~PySink.AsyncWorker` will perform a demo task of
 counting to five with a delay of 1 second between counts. Generally a worker emits three kinds of signals,
 a :attr:`~PySink.AsyncWorkerSignals.started` signal, a :attr:`~PySink.AsyncWorkerSignals.progress` signal, and a
@@ -9,9 +9,9 @@ a :attr:`~PySink.AsyncWorkerSignals.started` signal, a :attr:`~PySink.AsyncWorke
 :ref:`later<basic-part-d>`).
 
 The :attr:`~PySink.AsyncWorkerSignals.started` signal indicates that a worker has started it's long-running task. It
-contains the id of the worker, which can be used to differentiate between active workers. Note that to emit this signal,
+contains the id of the worker which can be used to differentiate between active workers. Note that to emit this signal,
 the worker must call its :meth:`~PySink.AsyncWorker.emit_start` method at the top of :meth:`~PySink.AsyncWorker.run`
-(more on overriding the :meth:`~PySink.AsyncWorker.run` method in Part B). Below is a callback that will be triggered
+(more on overriding the :meth:`~PySink.AsyncWorker.run` method in :ref:`Part B<basic-part-b>`). Below is a callback that will be triggered
 on the :attr:`~PySink.AsyncWorkerSignals.started` signal:
 
 ..  code-block:: python
@@ -40,16 +40,16 @@ signal, and receives the worker's results as an :class:`~PySink.AsyncWorkerResul
 
     def completion_callback(results: AsyncWorkerResults):
         print(f'\nWorker Complete!')
-        print(f'\tErrors: {results.errors}')
         print(f'\tWarnings: {results.warnings}')
-        print(f'\tResult Dict: {results.results_dict}')
+        print(f'\tErrors: {results.errors}')
         sys.exit()  # Exit the App event loop
 
-The results object contains the worker's warnings and errors (it also contains the custom results of the worker, those
-will be explained in Part B). The completion callback prints out the warnings and errors, then calls sys.exit() to end
-the App event Loop.
+The results object contains the worker's warnings and errors (it also contains the results of the worker, those
+will be explained in :ref:`Part B<basic-part-b>`). The completion callback prints out the warnings and errors,
+then calls sys.exit() to end the App event Loop.
 
-Now that the callbacks are taken care of, let's look at how an AsyncWorker is started with an AsyncManager:
+Now that the callbacks are taken care of, let's look at how an :class:`~PySink.AsyncWorker` is started with an
+:class:`~PySink.AsyncManager`:
 
 ..  code-block:: python
     :linenos:
@@ -73,10 +73,10 @@ Now that the callbacks are taken care of, let's look at how an AsyncWorker is st
 
 The general logic is as follows:
 
-#. Create an instance of AsyncManager
+#. Create an instance of :class:`~PySink.AsyncManager`
 #. Create an instance of the worker
 #. Connect the worker's signals to their callbacks (line 9-11)
-#. Start the worker by passing it to the manager's start_worker() method
+#. Start the worker by passing it to the manager's :meth:`~PySink.AsyncManager.start_worker` method
 
 This logic is wrapped in a QApplication so that it can run within a Qt event loop. Here's what the full python script
 looks like:
@@ -150,6 +150,6 @@ After running the script, the following lines will be printed to the console as 
 As indicated in the console output, the worker first fired it's :attr:`~PySink.AsyncWorkerSignals.started` signal,
 intermittently fired its :attr:`~PySink.AsyncWorkerSignals.progress` signal as it worked, then finally fired it's
 :attr:`~PySink.AsyncWorkerSignals.finished` signal when its task was complete. All of this was done in a background
-thread, which would have freed up the UI thread if there was one present. In :ref:`Example 1<example-1>`, we will see
-how to actually set up a full PySide Application with PySink, but before that let's see how to customize an AsyncWorker in
-:ref:`basic-part-b` and :ref:`basic-part-c`
+thread which frees up the UI thread to handle user input (if there was one present). In :ref:`Example 1<example-1>`, we will see
+how to actually set up a full PySide Application with PySink, but before that let's see how to customize an :class:`~PySink.AsyncWorker` in
+:ref:`basic-part-b` and :ref:`basic-part-c`.
