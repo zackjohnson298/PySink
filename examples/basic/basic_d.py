@@ -1,5 +1,6 @@
 from PySide6.QtWidgets import QApplication
-from PySink import AsyncManager, AsyncWorker, AsyncWorkerProgress, AsyncWorkerResults
+from PySide6.QtCore import Signal
+from PySink import AsyncManager, AsyncWorker, AsyncWorkerProgress, AsyncWorkerResults, AsyncWorkerSignals
 import sys
 import time
 
@@ -10,31 +11,46 @@ class CustomWorkerResults(AsyncWorkerResults):
     custom_result_2 = None
 
 
+# Define a class representing your signal type, storing result values as attributes
+class CustomWorkerSignals(AsyncWorkerSignals):
+    custom_signal = Signal(str)
+
+
 class CustomAsyncWorker(AsyncWorker):
     def __init__(self, delay_seconds: int, cycles=4):
         # Initialize AsyncWorker, passing in the custom result type
-        super(CustomAsyncWorker, self).__init__(result_type=CustomWorkerResults)
+        super(CustomAsyncWorker, self).__init__(result_type=CustomWorkerResults, signal_type=CustomWorkerSignals)
         self.delay_seconds = delay_seconds
         self.cycles = cycles
 
-    def run(self):
-        self.emit_start()
+    def do_part_1(self):
         progress = 5
         self.update_progress(progress, 'Starting Task')
         for ii in range(self.cycles):
             time.sleep(self.delay_seconds)
-            progress += 90 / self.cycles
-            self.update_progress(progress, f'Progress message #{ii + 1}')
-
-        # With a custom result type, you can store your data directly into the self.results attribute. In this case,
-        #   there is no need to pass any kwargs into self.complete
+            progress += 90 / (2 * self.cycles)
+            self.update_progress(progress, f'Progress message from part 1 #{ii + 1}')
         self.results.custom_result_1 = 'result 1'
+
+    def do_part_2(self):
+        progress = 50
+        for ii in range(self.cycles):
+            time.sleep(self.delay_seconds)
+            progress += 90 / (2 * self.cycles)
+            self.update_progress(progress, f'Progress message from part 2 #{ii + 1}')
         self.results.custom_result_2 = 'result 2'
+
+    def run(self):
+        self.emit_start()
+        self.do_part_1()
+        self.signals.custom_signal.emit('custom signal value')
+        self.do_part_2()
         self.complete()
 
-        # You can still pass results to self.complete() as kwargs. However, each key MUST be defined as an attribute
-        #   of the custom return type, else an AttributeError will be raised
-        # self.complete(custom_result_1=12, custom_result_2=100)
+
+# Function to be called when the custom signal is emitted
+def custom_signal_callback(signal_value):
+    print(f'\nCustom Signal received! Value: {signal_value}\n')
 
 
 # Function to be called whenever a worker's task has started
@@ -64,6 +80,7 @@ def run_main():
     #   Create the Worker and pass in the necessary values
     worker = CustomAsyncWorker(delay_seconds=1, cycles=3)
     #   Connect the Worker's signals to their callbacks
+    worker.signals.custom_signal.connect(custom_signal_callback)
     worker.signals.started.connect(worker_started_callback)
     worker.signals.progress.connect(progress_callback)
     worker.signals.finished.connect(completion_callback)

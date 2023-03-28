@@ -14,6 +14,7 @@ class CustomAsyncWorker(AsyncWorker):
 
     # Override AsyncWorker's .run() method
     def run(self):
+        self.emit_start()   # This can be called to signal the start of the task
         progress = 5
         self.update_progress(progress, 'Starting Task')
         for ii in range(self.cycles):
@@ -22,7 +23,12 @@ class CustomAsyncWorker(AsyncWorker):
             self.update_progress(progress, f'Progress message #{ii + 1}')
 
         # Result values can be passed to self.complete() as kwargs.
-        self.complete(custom_result_1='result 1', custom_result_2='result2')
+        self.complete(custom_result_1='result 1', custom_result_2='result 2')
+
+
+# Function to be called whenever a worker's task has started
+def worker_started_callback(worker_id: str):
+    print(f'Worker with id {worker_id} has started its task\n')
 
 
 # Function to be called whenever progress is updated
@@ -45,12 +51,13 @@ def run_main():
     #   Create the Async Manager
     manager = AsyncManager()
     #   Create the Worker and pass in the necessary values
-    demo_worker = CustomAsyncWorker(delay_seconds=1, cycles=3)
-    #   Connect the Manager's signals to their callbacks
-    manager.worker_progress_signal.connect(progress_callback)
-    manager.worker_finished_signal.connect(completion_callback)
+    worker = CustomAsyncWorker(delay_seconds=1, cycles=3)
+    #   Connect the Worker's signals to their callbacks
+    worker.signals.started.connect(worker_started_callback)
+    worker.signals.progress.connect(progress_callback)
+    worker.signals.finished.connect(completion_callback)
     #   Start the Worker and App event loop
-    manager.start_worker(demo_worker)
+    manager.start_worker(worker)
     app.exec()
 
 
