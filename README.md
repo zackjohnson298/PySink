@@ -2,26 +2,33 @@
 
 Created by Zack Johnson
 
-<span style="color:red">
-Under construction, not ready for use!
-</span>
+## Under construction, not yet ready for use!!
+
+Full documentation can be found on ReadTheDocs
 
 PySink is an extension of the PySide6 Qt Framework that simplifies the implementation
-of Asynchronous tasks in your Desktop Applications. It contains several
+of Asynchronous tasks in Desktop Applications. It contains several
 helper Widgets and Classes that enable you to build powerful and professional
 desktop applications without worrying about managing threads or freezing 
 UI with long-running tasks. PySink's implementation suggests an MVC 
 architecture for your application, but should perform well in other architectures
 such as MVVM.
 
-## Getting Started
+## Basic Overview
 PySink is based on the concept of Workers and Managers. Workers are custom objects that 
-perform your long-running tasks. They inherit from the provided *AsyncWorker* class and 
+perform long-running tasks. They inherit from the provided *AsyncWorker* class and 
 override the *AsyncWorker.run()* method to perform the tasks, emitting progress values and 
-optional status messages along the way. These workers are managed by a generalized object called the *AsyncManager*. 
+optional status messages along the way. These workers are managed by a generalized object called the
+*AsyncManager*. 
 
-The Manager is an object that manages all the threading, passes along the signals and values 
-emitted by the Worker, and handles the cancellation of said threads and workers when necessary.
+The Manager is an object that manages all the workers/threading and handles the termination/cancellation 
+of said threads and workers when necessary. The Manager can also pass along the signals emitted by 
+the worker (you can also connect to the worker's signals directly, see example 5 below).
+
+The two signals that
+
+## Getting Started
+
 
 Let's look at a couple examples to help you get started. Full examples and all source code can 
 be found at https://github.com/zackjohnson298/PySink
@@ -36,42 +43,39 @@ in via it's *\_\_init\_\_* method:
 from PySink import AsyncWorker
 
 
-class DemoAsyncWorker(AsyncWorker):
+class DemoAsyncWorker1(AsyncWorker):
     def __init__(self, delay_seconds: int, cycles=4):
-        super(DemoAsyncWorker, self).__init__()
+        super(DemoAsyncWorker1, self).__init__()
         # Store the values passed in during initialization
         self.delay_seconds = delay_seconds
         self.cycles = cycles
 ```
-To implement your long-running task, simply override AsyncWorker's *run* method.
-This method takes no parameters and returns nothing, it just performs your task. 
-Progress/status is emitted by calling the *self.update_progress(progress, message)*
-method, and when your task is done you can emit any results via the 
-*self.complete(\*\*kwargs)* method:
+To implement the long-running task, simply override AsyncWorker's *run* method.
+This method takes no parameters and returns nothing, it' only job is to perform the long-running task. 
+Progress is emitted by calling the *self.update_progress(progress, message)*method, and when the task is
+done you can emit any results via the *self.complete(\*\*kwargs)* method:
 
 ```python
 from PySink import AsyncWorker
 import time
 
 
-class DemoAsyncWorker(AsyncWorker):
+class DemoAsyncWorker1(AsyncWorker):
     def __init__(self, delay_seconds: int, cycles=4):
-        super(DemoAsyncWorker, self).__init__()
+        super(DemoAsyncWorker1, self).__init__()
+        # Store the values passed in during initialization
         self.delay_seconds = delay_seconds
         self.cycles = cycles
 
     def run(self):
-        progress = 0
-        progress_increment = 100 / self.cycles
-        # Update progress by providing a progress value from 0-100 with an 
-        #   optional message
-        self.update_progress(0, 'Starting Task')
+        # Update discrete progress by providing a progress value from 0-100 with an optional message
+        progress = 5
+        self.update_progress(progress, 'Starting Task')
         for ii in range(self.cycles):
             time.sleep(self.delay_seconds)
-            progress += progress_increment
+            progress += 90 / self.cycles
             self.update_progress(progress, f'Progress message #{ii + 1}')
-        # Call the self.complete method to end your task, passing any 
-        #   results as keyword arguments
+        # Call the self.complete method to end your task, passing any results as keyword arguments
         demo_result = 12
         self.complete(demo_result=demo_result)
 ```
@@ -245,7 +249,7 @@ as a script on its own and see the window you've just created. Doing this allows
 sure the UI looks correct before you connect any actions to the View. 
 Run the script to see the app window:
 
-![alt text](img/example2_main_view.png "Title")
+![alt text](docs/img/example2_main_view.png "Title")
 
 This very simple app has a start button, progress bar, and some labels to display the data.
 The View also has a signal that gets emitted on the button press, as well as a 
@@ -271,12 +275,12 @@ class MainController:
         self.view = view
         self.async_manager = AsyncManager()
         # Connect UI Signals
-        self.view.button_pushed_signal.connect(self.start_task)
+        self.view.start_signal.connect(self.start_task)
         # Connect Async Signals
         self.async_manager.worker_progress_signal.connect(self.view.set_progress)
         self.async_manager.worker_finished_signal.connect(self.task_complete_callback)
         # Initialize UI State
-        self.view.show_button()
+        self.view.hide_progress()
 
     def start_task(self):
         # Update UI
@@ -289,7 +293,7 @@ class MainController:
     def task_complete_callback(self, results):
         # Update UI
         self.view.clear()
-        self.view.show_button()
+        self.view.hide_progress()
         # Handle results
         self.view.set_result(results.get('demo_result'))
         self.view.set_warnings(results.get('warnings'))
@@ -303,6 +307,7 @@ doesn't need UI at all) tests can be automated much faster. Again, this is not r
 get a PySink app to work, but this practice will be beneficial in the long run.
 
 Let's take a closer look at the Controller's *\_\_init\_\_()* method:
+
 ```python
 class MainController:
     def __init__(self, view: MainView):
@@ -310,12 +315,12 @@ class MainController:
         self.view = view
         self.async_manager = AsyncManager()
         # Connect UI Signals
-        self.view.button_pushed_signal.connect(self.start_task)
+        self.view.start_signal.connect(self.start_task)
         # Connect Async Signals
         self.async_manager.worker_progress_signal.connect(self.view.set_progress)
         self.async_manager.worker_finished_signal.connect(self.task_complete_callback)
         # Initialize UI State
-        self.view.show_button()
+        self.view.hide_progress()
 ```
 
 Within the *\_\_init__()* method, any attributes needed by the controller are initialized and
@@ -360,13 +365,13 @@ Here's what the callback looks like:
 
 ```python
     def task_complete_callback(self, results):
-        # Update UI
-        self.view.clear()
-        self.view.show_button()
-        # Handle results
-        self.view.set_result(results.get('demo_result'))
-        self.view.set_warnings(results.get('warnings'))
-        self.view.set_errors(results.get('errors'))
+    # Update UI
+    self.view.clear()
+    self.view.hide_progress()
+    # Handle results
+    self.view.set_result(results.get('demo_result'))
+    self.view.set_warnings(results.get('warnings'))
+    self.view.set_errors(results.get('errors'))
 ```
 
 As stated in the previous example, the results of the worker's task are provided as a 
@@ -397,9 +402,9 @@ app.exec()
 Run the script and the application will start. Pushing the start button within the app will 
 trigger the long-running task, and at its completion data from the worker will be displayed:
 
-![alt text](img/example2_while_running.png "Title")
+![alt text](docs/img/example2_while_running.png "Title")
 
-![alt text](img/example2_complete.png "Title")
+![alt text](docs/img/example2_complete.png "Title")
 
 
 Congratulations! You've just created an asynchronous app with PySink!
