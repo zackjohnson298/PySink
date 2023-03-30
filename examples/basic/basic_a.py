@@ -19,6 +19,7 @@ def completion_callback(results: AsyncWorkerResults):
     print(f'\nWorker Complete!')
     print(f'\tWarnings: {results.warnings}')
     print(f'\tErrors: {results.errors}')
+    print(f'\tResults: {results.results_dict}')
     sys.exit()  # Exit the App event loop
 
 

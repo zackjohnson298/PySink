@@ -1,3 +1,5 @@
+.. _basic-part-a:
+
 Part A - Starting an AsyncWorker
 ================================
 
@@ -42,6 +44,7 @@ signal, and receives the worker's results as an :class:`~PySink.AsyncWorkerResul
         print(f'\nWorker Complete!')
         print(f'\tWarnings: {results.warnings}')
         print(f'\tErrors: {results.errors}')
+        print(f'\tResults: {results.results_dict}')
         sys.exit()  # Exit the App event loop
 
 The results object contains the worker's warnings and errors (it also contains the results of the worker, those
@@ -105,6 +108,7 @@ looks like:
         print(f'\nWorker Complete!')
         print(f'\tWarnings: {results.warnings}')
         print(f'\tErrors: {results.errors}')
+        print(f'\tResults: {results.results_dict}')
         sys.exit()  # Exit the App event loop
 
 
@@ -133,7 +137,7 @@ After running the script, the following lines will be printed to the console as 
 ..  code-block:: console
     :linenos:
 
-    Worker with id d8fa8b9c-5160-48d8-8712-f592bef8addd has started its task
+    Worker with id 88f864a0-ba66-4b73-9a9a-38437d7225ce has started its task
 
     Progress Received, value: 5, message: Starting
     Progress Received, value: 23.0, message: Step 1
@@ -145,6 +149,7 @@ After running the script, the following lines will be printed to the console as 
     Worker Complete!
         Warnings: []
         Errors: []
+        Results: {'demo_result': 'Demo Result Value'}
 
 
 As indicated in the console output, the worker first fired it's :attr:`~PySink.AsyncWorkerSignals.started` signal,

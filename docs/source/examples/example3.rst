@@ -1,3 +1,5 @@
+.. _example-3:
+
 Multiple AsyncWorkers
 ==================================
 

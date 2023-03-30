@@ -38,7 +38,7 @@ class AsyncWorker(QRunnable):
             time.sleep(1)
             progress += 90 / 5
             self.update_progress(progress, f'Step {ii+1}')
-        self.complete()
+        self.complete(demo_result='Demo Result Value')
 
     def reset(self) -> None:
         """Resets the worker's state. All warnings and errors will be cleared, and :attr:`~result` will be reset to the
