@@ -35,8 +35,9 @@ Here is a simple callback function that will print out the progress of an :class
 The callback receives the progress as a parameter. Within the callback, the progress :attr:`~PySink.AsyncWorkerProgress.value`
 and :attr:`~PySink.AsyncWorkerProgress.message` attributes are extracted and printed to the console.
 
-Now let's take a look at the completion callback. This will be connected to the worker's :attr:`~PySink.AsyncWorkerSignals.finished`
-signal, and receives the worker's results as an :class:`~PySink.AsyncWorkerResults` object:
+Now let's take a look at the completion callback. This is the function that gets called when the worker is done running
+it's task. It gets connected to the worker's :attr:`~PySink.AsyncWorkerSignals.finished` signal and receives the
+worker's results as an :class:`~PySink.AsyncWorkerResults` object:
 
 ..  code-block:: python
 
@@ -48,7 +49,7 @@ signal, and receives the worker's results as an :class:`~PySink.AsyncWorkerResul
         sys.exit()  # Exit the App event loop
 
 The results object contains the worker's warnings and errors (it also contains the results of the worker, those
-will be explained in :ref:`Part B<basic-part-b>`). The completion callback prints out the warnings and errors,
+will be explained in :ref:`Part B<basic-part-b>`). This completion callback prints out the warnings, errors, and results,
 then calls sys.exit() to end the App event Loop.
 
 Now that the callbacks are taken care of, let's look at how an :class:`~PySink.AsyncWorker` is started with an
@@ -157,4 +158,4 @@ intermittently fired its :attr:`~PySink.AsyncWorkerSignals.progress` signal as i
 :attr:`~PySink.AsyncWorkerSignals.finished` signal when its task was complete. All of this was done in a background
 thread which frees up the UI thread to handle user input (if there was one present). In :ref:`Example 1<example-1>`, we will see
 how to actually set up a full PySide Application with PySink, but before that let's see how to customize an :class:`~PySink.AsyncWorker` in
-:ref:`basic-part-b` and :ref:`basic-part-c`.
+:ref:`basic-part-b`.

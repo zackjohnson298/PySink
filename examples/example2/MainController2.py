@@ -38,7 +38,3 @@ class MainController2:
         self.view.set_errors(results.errors)
         self.view.start_button.setEnabled(True)
         self.view.cancel_button.setEnabled(False)
-
-
-
-

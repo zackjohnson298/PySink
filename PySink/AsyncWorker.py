@@ -6,25 +6,21 @@ from PySink.Objects import AsyncWorkerResults, AsyncWorkerSignals, AsyncWorkerPr
 
 
 class AsyncWorker(QRunnable):
-    def __init__(self, identifier: Optional[str] = None, result_type=AsyncWorkerResults, signal_type=AsyncWorkerSignals):
+    def __init__(self, identifier: Optional[str] = None):
         """A class that represents an Asynchronous Worker. Workers should inherit from this class
-        and perform their long-running tasks by overriding the :meth:`~run` method..
+        and perform their long-running tasks by overriding the :meth:`~run` method.
+
+        To define custom :attr:`~results` and :attr:`~signals`, redefine them within your custom worker's __init__ method..
 
         :param identifier: A unique identifier to differentiate this worker from other workers. Defaults to a uuid4 string
         :type identifier: str, optional
-        :param result_type: The type that the results should be output in. Defaults to :class:`~AsyncWorkerResults`
-        :type result_type: class, optional
-        :param signal_type: The type of the :attr:`~signals` attribute. Defaults to :class:`~AsyncWorkerSignals`
-        :type signal_type: class, optional
         """
         super(AsyncWorker, self).__init__()
         self.errors: list = []
         self.warnings: list = []
         self.id: str = identifier if identifier is not None else str(uuid.uuid4())
-        self.signals: signal_type = signal_type()
-        self.signal_type = signal_type
-        self.results: result_type = result_type()
-        self.result_type = result_type
+        self.signals: AsyncWorkerSignals = AsyncWorkerSignals()
+        self.results: AsyncWorkerResults = AsyncWorkerResults()
 
     @Slot()
     def run(self) -> None:
@@ -46,7 +42,7 @@ class AsyncWorker(QRunnable):
         """
         self.errors = []
         self.warnings = []
-        self.results = self.result_type()
+        self.results = type(self.results)()
 
     def update_progress(self, progress_value: int, message='') -> None:
         """Emits the progress value and message. These values are emitted via the
@@ -77,26 +73,25 @@ class AsyncWorker(QRunnable):
         :attr:`self.signals.finished<AsyncWorkerSignals.finished>` signal.
 
         By default, the kwargs provided will be packaged into :attr:`results.results_dict<AsyncWorkerResults.results_dict>`
-        as key-value pairs. However, if a custom result type was defined within :meth:`__init__()<AsyncWorker>`, the
-        provided kwargs will be mapped to the attributes of the custom result type. In this scenario, the kwargs MUST
-        match the defined attributes of the custom return type..
+        as key-value pairs. However, if a custom result type was defined within :meth:`__init__()<AsyncWorker>`,
+        the key-word arguments will also be mapped to their corresponding result attributes (they will still be packed
+        into the result_dict)
 
         :param kwargs: Result values to be emitted, defined as key-word arguments
-        :raises AttributeError: If a custom return type is defined, the keys in kwargs MUST match the attributes of
-            the return type, else an AttributeError will be raised.
         """
         self._load_default_results(clear=False)
-        if self.result_type == AsyncWorkerResults:
-            self.results.results_dict = kwargs
-        else:
+        self.results.results_dict = kwargs
+        try:
             for key in kwargs:
                 getattr(self.results, key)
                 setattr(self.results, key, kwargs[key])
+        except AttributeError:
+            pass
         self.signals.finished.emit(self.results)
 
     def _load_default_results(self, clear=True) -> AsyncWorkerResults:
         if clear:
-            self.results = self.result_type()
+            self.results = type(self.results)()
         self.results.errors = self.errors
         self.results.warnings = self.warnings
         self.results.id = self.id
