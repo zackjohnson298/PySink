@@ -1,6 +1,7 @@
 name: dev39_PySink
 channels:
   - conda-forge
+  - defaults
 dependencies:
   - bzip2=1.0.8=h3422bc3_4
   - ca-certificates=2022.12.7=h4653dfc_0
