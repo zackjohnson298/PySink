@@ -1,6 +1,6 @@
 .. _basic-part-b:
 
-Part B - Defining a Custom AsyncWorker
+Part B - Defining Custom AsyncWorkers
 ======================================
 
 In :ref:`Part A<basic-part-a>`, we saw a default :class:`~PySink.AsyncWorker` in action. However, the whole point of
@@ -38,6 +38,10 @@ to the :meth:`~PySink.AsyncWorker.complete` method as keyword arguments (more on
                 progress += 90 / self.cycles
                 self.update_progress(progress, f'Progress message #{ii + 1}')
 
+            # You can keep track of warnings or errors by appending them to the warnings or errors lists
+            self.warnings.append('Custom Warning')
+            self.errors.append('Custom Error')
+
             # Result values can be passed to self.complete() as kwargs.
             self.complete(custom_result_1='result 1', custom_result_2='result 2')
 
@@ -45,12 +49,16 @@ to the :meth:`~PySink.AsyncWorker.complete` method as keyword arguments (more on
 Let's take a closer look at the :meth:`~PySink.AsyncWorker.run` method. On line 11, the
 :meth:`~PySink.AsyncWorker.emit_start` method is called to signal the start of the worker's task (this is not necessary,
 however it can be useful if there are a lot of workers running :ref:`simultaneously<example-3>`). In lines 12-17 the
-task is actually implemented. Finally, in line 20 the :meth:`~PySink.AsyncWorker.complete` method is called. If your
-task ends up having any result values (image data, calculation results, etc.) the simple way to emit those values is to
+task is actually implemented. As shown in lines 20 and 21, you can keep track of warnings and errors by appending them
+to the worker's :attr:`~PySink.AsyncWorker.warnings` and :attr:`~PySink.AsyncWorker.errors`. These warnings and errors
+will automatically be propagated to the results object emitted by the :attr:`~PySink.AsyncWorkerSignals.finished` signal.
+
+Once the task is complete, the :meth:`~PySink.AsyncWorker.complete` method is called. If your
+task ends up having any result values (data from an API, calculation results, etc.) the simple way to emit those values is to
 pass them into the :meth:`~PySink.AsyncWorker.complete` method as keyword arguments. The
 :meth:`~PySink.AsyncWorker.complete` method will pack those results into the :attr:`~PySink.AsyncWorkerResults.results_dict`
-attribute that gets emitted by the :attr:`~PySink.AsyncWorkerSignals.finished` signal. To access this data, pull it
-from :class:`AsyncWorkerResults'<PySink.AsyncWorkerResults>` :attr:`~PySink.AsyncWorkerResults.results_dict` attribute
+attribute of the :class:`~PySink.AsyncWorkerResults` object that gets emitted by the :attr:`~PySink.AsyncWorkerSignals.finished`
+signal. To access this data, pull it from :attr:`~PySink.AsyncWorkerResults.results_dict` attribute
 within the completion callback like this:
 
 ..  code-block:: python
@@ -97,6 +105,10 @@ And that's it. All of the other callback methods stay the same as :ref:`Part A<b
                 time.sleep(self.delay_seconds)
                 progress += 90 / self.cycles
                 self.update_progress(progress, f'Progress message #{ii + 1}')
+
+            # You can keep track of warnings or errors by appending them to the warnings or errors lists
+            self.warnings.append('Custom Warning')
+            self.errors.append('Custom Error')
 
             # Result values can be passed to self.complete() as kwargs.
             self.complete(custom_result_1='result 1', custom_result_2='result 2')
@@ -145,7 +157,7 @@ Running this script gives the following output in the terminal:
 ..  code-block:: console
     :linenos:
 
-    Worker with id 8597cc8b-043d-4d4d-a252-f92773dbba7b has started its task
+    Worker with id 409976aa-5999-46cb-be4a-2e244a175316 has started its task
 
     Progress Received, value: 5, message: Starting Task
     Progress Received, value: 35.0, message: Progress message #1
@@ -153,9 +165,12 @@ Running this script gives the following output in the terminal:
     Progress Received, value: 95.0, message: Progress message #3
 
     Worker Complete!
-        Errors: []
-        Warnings: []
+        Errors: ['Custom Error']
+        Warnings: ['Custom Warning']
         Result 1: result 1
         Result 2: result 2
 
 
+Congratulations! You've just implemented your first custom :class:`~PySink.AsyncWorker`. The output of this worker is
+still getting printed to the console, but before seeing how to :ref:`implement a worker in a PySide6 app<basic-part-a>`,
+let's see how to further customize an :class:`~PySink.AsyncWorker` in :ref:`basic-part-c` and :ref:`basic-part-d`.
