@@ -22,6 +22,10 @@ class CustomAsyncWorker(AsyncWorker):
             progress += 90 / self.cycles
             self.update_progress(progress, f'Progress message #{ii + 1}')
 
+        # You can keep track of warnings or errors by appending them to the warnings or errors lists
+        self.warnings.append('Custom Warning')
+        self.errors.append('Custom Error')
+
         # Result values can be passed to self.complete() as kwargs.
         self.complete(custom_result_1='result 1', custom_result_2='result 2')
 

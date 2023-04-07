@@ -32,5 +32,3 @@ class MainController1:
         self.view.set_result(results.demo_result)
         self.view.set_warnings(results.warnings)
         self.view.set_errors(results.errors)
-
-

@@ -12,10 +12,11 @@ class CustomWorkerResults(AsyncWorkerResults):
 
 class CustomAsyncWorker(AsyncWorker):
     def __init__(self, delay_seconds: int, cycles=4):
-        # Initialize AsyncWorker, passing in the custom result type
-        super(CustomAsyncWorker, self).__init__(result_type=CustomWorkerResults)
+        super(CustomAsyncWorker, self).__init__()
         self.delay_seconds = delay_seconds
         self.cycles = cycles
+        # Redefine the self.results attribute
+        self.results = CustomWorkerResults()
 
     def run(self):
         self.emit_start()
@@ -32,8 +33,8 @@ class CustomAsyncWorker(AsyncWorker):
         self.results.custom_result_2 = 'result 2'
         self.complete()
 
-        # You can still pass results to self.complete() as kwargs. However, each key MUST be defined as an attribute
-        #   of the custom return type, else an AttributeError will be raised
+        # You can still pass results to self.complete() as kwargs. These will be mapped to the result attributes and
+        #   still be packed into the results_dict
         # self.complete(custom_result_1=12, custom_result_2=100)
 
 
@@ -54,6 +55,7 @@ def completion_callback(results: CustomWorkerResults):
     print(f'\tWarnings: {results.warnings}')
     print(f'\tResult Attribute 1: {results.custom_result_1}')
     print(f'\tResult Attribute 2: {results.custom_result_2}')
+    # print(f'\tResultDict: {results.results_dict}')
     sys.exit()  # Exit the App event loop
 
 

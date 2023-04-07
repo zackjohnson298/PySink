@@ -77,4 +77,3 @@ if __name__ == '__main__':
     p.save('example2_main_view.png', 'png')
 
     app.exec()
-

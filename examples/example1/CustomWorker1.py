@@ -8,9 +8,10 @@ class CustomWorker1Results(AsyncWorkerResults):
 
 class CustomWorker1(AsyncWorker):
     def __init__(self, delay_seconds: int, cycles=4):
-        super(CustomWorker1, self).__init__(result_type=CustomWorker1Results)
+        super(CustomWorker1, self).__init__()
         self.delay_seconds = delay_seconds
         self.cycles = cycles
+        self.results = CustomWorker1Results()
 
     def run(self):
         progress = 5
@@ -22,8 +23,8 @@ class CustomWorker1(AsyncWorker):
 
         # Setting results directly
         self.results.demo_result = 12
-        self.complete()
-
         # Passing results as kwargs
         # self.complete(demo_result=12)
+        self.complete()
+
 

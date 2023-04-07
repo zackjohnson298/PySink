@@ -13,15 +13,17 @@ class CustomWorkerResults(AsyncWorkerResults):
 
 # Define a class representing your signal type, storing result values as attributes
 class CustomWorkerSignals(AsyncWorkerSignals):
-    custom_signal = Signal(str)
+    part_1_complete_signal = Signal(str)
 
 
 class CustomAsyncWorker(AsyncWorker):
     def __init__(self, delay_seconds: int, cycles=4):
-        # Initialize AsyncWorker, passing in the custom result type
-        super(CustomAsyncWorker, self).__init__(result_type=CustomWorkerResults, signal_type=CustomWorkerSignals)
+        super(CustomAsyncWorker, self).__init__()
         self.delay_seconds = delay_seconds
         self.cycles = cycles
+        # Redefine the 'results' and 'signals' attributes
+        self.results = CustomWorkerResults()
+        self.signals = CustomWorkerSignals()
 
     def do_part_1(self):
         progress = 5
@@ -43,7 +45,7 @@ class CustomAsyncWorker(AsyncWorker):
     def run(self):
         self.emit_start()
         self.do_part_1()
-        self.signals.custom_signal.emit('custom signal value')
+        self.signals.part_1_complete_signal.emit('Part 1 Complete')
         self.do_part_2()
         self.complete()
 
@@ -80,7 +82,7 @@ def run_main():
     #   Create the Worker and pass in the necessary values
     worker = CustomAsyncWorker(delay_seconds=1, cycles=3)
     #   Connect the Worker's signals to their callbacks
-    worker.signals.custom_signal.connect(custom_signal_callback)
+    worker.signals.part_1_complete_signal.connect(custom_signal_callback)
     worker.signals.started.connect(worker_started_callback)
     worker.signals.progress.connect(progress_callback)
     worker.signals.finished.connect(completion_callback)
