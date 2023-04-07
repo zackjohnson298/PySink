@@ -19,7 +19,7 @@ classifiers = [
 ]
 keywords = ['python', 'app', 'gui', 'async', 'application', 'desktop', 'ui']
 dependencies = [
-    'pyside6'
+    'PySide6'
 ]
 requires-python = ">=3.9"
 
