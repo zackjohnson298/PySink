@@ -1,4 +1,4 @@
-BasicS - The AsyncWorker
+Basics - The AsyncWorker
 ========================
 
 In this example, you will see how to start an :class:`~PySink.AsyncWorker`, create a new worker with a custom task, define a custom

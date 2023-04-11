@@ -1,7 +1,7 @@
 
 
 class AsyncWorkerProgress:
-    """Class to store the progress of an AsyncWorker."""
+    """Class to store the progress of an :class:`AsyncWorker`."""
 
     value = 0               #: Union[int, float]: Current progress value. For determinate progress, value should be [0, 100]. Indeterminate progress value should be -1.
     message: str = None     #: str, optional: Status message about the worker's progress (Downloading, Calculating, etc).

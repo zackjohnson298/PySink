@@ -11,7 +11,7 @@ class CustomWorkerResults(AsyncWorkerResults):
     custom_result_2 = None
 
 
-# Define a class representing your signal type, storing result values as attributes
+# Define a class representing your signal type, storing signals as attributes
 class CustomWorkerSignals(AsyncWorkerSignals):
     part_1_complete_signal = Signal(str)
 
@@ -51,7 +51,7 @@ class CustomAsyncWorker(AsyncWorker):
 
 
 # Function to be called when the custom signal is emitted
-def custom_signal_callback(signal_value):
+def custom_signal_callback(signal_value: str):
     print(f'\nCustom Signal received! Value: {signal_value}\n')
 
 

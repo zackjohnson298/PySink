@@ -3,9 +3,9 @@ from PySink import AsyncWorker
 
 class CancellableAsyncWorker(AsyncWorker):
     def __init__(self, *args, **kwargs):
-        """A class that represents a cancellable AsyncWorker. Any workers that need to be cancellable should
-        inherit from this class. CancellableAsyncWorker inherits from :class:`AsyncWorker`, and offers the ability to
-        cancel the worker's task at any time by calling the :meth:`~cancel` method.
+        """A class that represents a cancellable :class:`~AsyncWorker`. Any workers that need to be cancellable
+        should inherit from this class. CancellableAsyncWorker inherits from :class:`AsyncWorker`, and offers the
+        ability to cancel the worker's task at any time by calling the :meth:`~cancel` method.
 
         IMPORTANT NOTE: While calling :meth:`~cancel` effectively halts the worker's task, it DOES NOT terminate the
         execution of :meth:`run()<AsyncWorker.run>` (doing so could result in unwanted data corruption). Within
